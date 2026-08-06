@@ -1,0 +1,45 @@
+<section class="contexto" aria-labelledby="titulo-contexto-desenvolvimento">
+  <header class="contexto-cabecalho">
+    <div>
+      <h2 id="titulo-contexto-desenvolvimento">Contexto de desenvolvimento</h2>
+      <p>Referência local para consultas. Não representa autenticação no SIP.</p>
+    </div>
+  </header>
+
+  <p class="carregando" *ngIf="exibirCarregamento">Carregando contexto de desenvolvimento...</p>
+
+  <section class="erro" *ngIf="exibirErro" role="alert">
+    <h3>Não foi possível carregar o contexto</h3>
+    <p>{{ mensagemErro }}</p>
+  </section>
+
+  <div class="conteudo" *ngIf="exibirConteudo">
+    <dl>
+      <div>
+        <dt>Usuário de referência</dt>
+        <dd>{{ identificacaoUsuario }}</dd>
+      </div>
+      <div>
+        <dt>Organização</dt>
+        <dd>{{ identificacaoOrgao }}</dd>
+      </div>
+    </dl>
+
+    <section class="sem-unidades" *ngIf="exibirSemUnidades" role="alert">
+      <h3>Nenhuma unidade disponível</h3>
+      <p>O contexto de desenvolvimento não disponibilizou uma unidade para consulta.</p>
+    </section>
+
+    <label for="unidade-contexto" *ngIf="!exibirSemUnidades">Unidade para consulta</label>
+    <select
+      id="unidade-contexto"
+      *ngIf="!exibirSemUnidades"
+      [value]="valorUnidadeSelecionada"
+      [disabled]="seletorDesabilitado"
+      (change)="alterarUnidade($event)">
+      <option *ngFor="let unidade of unidades" [value]="unidade.valor" [selected]="unidade.selecionada">
+        {{ unidade.rotulo }}
+      </option>
+    </select>
+  </div>
+</section>

@@ -1,0 +1,72 @@
+:host {
+  display: block;
+}
+
+.resumo {
+  margin-bottom: 1.25rem;
+}
+
+.estado {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.7rem 0.85rem;
+  margin-bottom: 0.85rem;
+  color: #14532d;
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  border-radius: 0.35rem;
+}
+
+.indicador {
+  width: 0.55rem;
+  height: 0.55rem;
+  background: #16a34a;
+  border-radius: 50%;
+}
+
+.banco {
+  margin-left: auto;
+  color: #475569;
+}
+
+.cartoes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.7rem;
+}
+
+.cartao {
+  min-width: 0;
+  padding: 0.9rem;
+  color: #1e293b;
+  background: #fff;
+  border: 1px solid #dbe2ea;
+  border-radius: 0.35rem;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 5%);
+}
+
+.cartao span {
+  display: block;
+  overflow-wrap: anywhere;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.cartao strong {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 1.45rem;
+}
+
+@media (max-width: 40rem) {
+  .estado {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .banco {
+    width: 100%;
+    margin-left: 1rem;
+  }
+}

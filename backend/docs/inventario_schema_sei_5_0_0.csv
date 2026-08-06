@@ -1,0 +1,195 @@
+﻿tabela,categoria,colunas,chave_primaria,fks_saida,fks_entrada,indices_pg,sequencia,presente_mysql,mesmas_colunas,mesma_ordem_colunas
+acao_federacao,Federação,11,id_acao_federacao,0,1,0,,S,S,S
+acesso,Acesso e segurança,6,id_acesso,4,0,7,seq_acesso,S,S,N
+acesso_externo,Acesso e segurança,13,id_acesso_externo,3,2,7,seq_acesso_externo,S,S,N
+acesso_federacao,Federação,17,id_acesso_federacao,10,0,13,,S,S,S
+acompanhamento,Outros,9,id_acompanhamento,4,0,4,seq_acompanhamento,S,S,S
+andamento_instalacao,Tramitação e atividades,7,id_andamento_instalacao,4,1,4,seq_andamento_instalacao,S,S,S
+andamento_marcador,Tramitação e atividades,10,id_andamento_marcador,4,0,6,seq_andamento_marcador,S,S,N
+andamento_plano_trabalho,Tramitação e atividades,8,id_andamento_plano_trabalho,5,1,5,seq_andamento_plano_trabalho,S,S,S
+andamento_situacao,Tramitação e atividades,7,id_andamento_situacao,4,0,5,seq_andamento_situacao,S,S,N
+anexo,Arquivos,11,id_anexo,4,1,7,seq_anexo,S,S,N
+anotacao,Outros,8,id_anotacao,3,0,4,seq_anotacao,S,S,S
+arquivamento,Gestão documental,10,id_protocolo,8,0,8,,S,S,S
+arquivo_extensao,Gestão documental,9,id_arquivo_extensao,0,0,0,seq_arquivo_extensao,S,S,S
+assinante,Assinaturas,3,id_assinante,1,1,1,seq_assinante,S,S,S
+assinatura,Assinaturas,15,id_assinatura,5,0,8,seq_assinatura,S,S,N
+assunto,Classificação e catálogo,11,id_assunto,1,4,2,seq_assunto,S,S,N
+assunto_proxy,Classificação e catálogo,2,id_assunto_proxy,1,4,1,seq_assunto_proxy,S,S,S
+atividade,Tramitação e atividades,15,id_atividade,9,15,19,seq_atividade,S,S,N
+atributo,Outros,15,id_atributo,1,2,1,seq_atributo,S,S,S
+atributo_andam_plano_trab,Outros,5,id_atributo_andam_plano_trab,1,0,1,seq_atributo_andam_plano_trab,S,S,S
+atributo_andamento,Tramitação e atividades,5,id_atributo_andamento,1,0,4,seq_atributo_andamento,S,S,N
+atributo_instalacao,Outros,5,id_atributo_instalacao,1,0,1,seq_atributo_instalacao,S,S,S
+auditoria_protocolo,Infraestrutura e auditoria,6,id_auditoria_protocolo,0,0,1,seq_auditoria_protocolo,S,S,S
+avaliacao_documental,Gestão documental,8,id_avaliacao_documental,5,2,6,seq_avaliacao_documental,S,S,S
+aviso,Comunicação,8,id_aviso,0,1,1,seq_aviso,S,S,S
+base_conhecimento,Modelos e conhecimento,14,id_base_conhecimento,4,3,6,seq_base_conhecimento,S,S,N
+base_conhecimento_idx,Modelos e conhecimento,3,"id_base_conhecimento,id_anexo",0,0,1,,S,S,S
+bloco,Blocos e grupos,7,id_bloco,2,2,6,seq_bloco,S,S,S
+campo_pesquisa,Outros,4,id_campo_pesquisa,1,0,1,seq_campo_pesquisa,S,S,S
+cargo,Identidade e organização,7,id_cargo,3,1,4,seq_cargo,S,S,N
+cargo_funcao,Identidade e organização,4,"id_cargo_funcao,id_unidade",1,0,1,,S,S,S
+categoria,Classificação e catálogo,3,id_categoria,0,1,0,seq_categoria,S,S,S
+cidade,Contatos e participantes,8,id_cidade,2,1,4,seq_cidade,S,S,N
+codigo_acesso,Acesso e segurança,7,id_codigo_acesso,1,0,3,,S,S,S
+comentario,Outros,7,id_comentario,4,0,5,seq_comentario,S,S,S
+conjunto_estilos,Modelos e conhecimento,2,id_conjunto_estilos,0,4,0,seq_conjunto_estilos,S,S,S
+conjunto_estilos_item,Modelos e conhecimento,4,id_conjunto_estilos_item,1,1,1,seq_conjunto_estilos_item,S,S,S
+contato,Contatos e participantes,42,id_contato,10,5,14,seq_contato,S,S,N
+controle_interno,Outros,2,id_controle_interno,0,5,0,seq_controle_interno,S,S,S
+controle_prazo,Tramitação e atividades,6,id_controle_prazo,3,0,6,seq_controle_prazo,S,S,S
+controle_unidade,Tramitação e atividades,6,,0,0,0,seq_controle_unidade,S,S,N
+documento,Documentos,16,id_documento,7,10,13,seq_documento,S,S,N
+documento_conteudo,Documentos,5,id_documento,1,0,0,,S,S,S
+documento_geracao,Documentos,3,id_documento,1,0,0,,S,S,S
+dominio,Classificação e catálogo,7,id_dominio,1,0,1,seq_dominio,S,S,S
+edital_eliminacao,Gestão documental,7,id_edital_eliminacao,3,1,3,seq_edital_eliminacao,S,S,S
+edital_eliminacao_conteudo,Gestão documental,5,id_edital_eliminacao_conteudo,3,1,3,seq_edital_eliminacao_conteudo,S,S,S
+edital_eliminacao_erro,Gestão documental,4,id_edital_eliminacao_erro,1,0,1,seq_edital_eliminacao_erro,S,S,S
+email_grupo_email,Comunicação,5,id_email_grupo_email,1,0,1,seq_email_grupo_email,S,S,S
+email_sistema,Comunicação,8,id_email_sistema,0,0,1,seq_email_sistema,S,S,N
+email_unidade,Comunicação,5,id_email_unidade,1,0,1,seq_email_unidade,S,S,S
+email_utilizado,Comunicação,3,id_email_utilizado,1,0,1,seq_email_utilizado,S,S,S
+estatisticas,Outros,13,,0,0,1,seq_estatisticas,S,S,N
+estilo,Modelos e conhecimento,3,id_estilo,0,1,0,seq_estilo,S,S,S
+etapa_trabalho,Outros,6,id_etapa_trabalho,1,1,1,seq_etapa_trabalho,S,S,S
+feed,Comunicação,2,id_feed,0,0,0,seq_feed,S,S,S
+feriado,Outros,4,id_feriado,1,0,1,seq_feriado,S,S,S
+grupo_acompanhamento,Blocos e grupos,3,id_grupo_acompanhamento,1,2,1,seq_grupo_acompanhamento,S,S,N
+grupo_bloco,Blocos e grupos,4,id_grupo_bloco,1,2,1,seq_grupo_bloco,S,S,S
+grupo_contato,Blocos e grupos,6,id_grupo_contato,1,1,1,seq_grupo_contato,S,S,S
+grupo_email,Comunicação,6,id_grupo_email,1,1,1,seq_grupo_email,S,S,N
+grupo_federacao,Federação,6,id_grupo_federacao,1,1,1,seq_grupo_federacao,S,S,S
+grupo_protocolo_modelo,Blocos e grupos,3,id_grupo_protocolo_modelo,1,1,1,seq_grupo_protocolo_modelo,S,S,N
+grupo_serie,Blocos e grupos,4,id_grupo_serie,0,1,0,seq_grupo_serie,S,S,S
+grupo_unidade,Blocos e grupos,6,id_grupo_unidade,1,1,1,seq_grupo_unidade,S,S,N
+hipotese_legal,Classificação e catálogo,6,id_hipotese_legal,0,2,0,seq_hipotese_legal,S,S,S
+imagem_formato,Outros,4,id_imagem_formato,0,0,0,seq_imagem_formato,S,S,S
+infra_agendamento_tarefa,Infraestrutura e auditoria,11,id_infra_agendamento_tarefa,0,0,0,,S,S,S
+infra_auditoria,Infraestrutura e auditoria,23,id_infra_auditoria,0,0,5,seq_infra_auditoria,S,S,N
+infra_captcha,Infraestrutura e auditoria,6,"identificacao,dia,mes,ano",0,0,0,,S,S,S
+infra_dado_usuario,Infraestrutura e auditoria,3,"id_usuario,nome",0,0,0,,S,S,S
+infra_editor_comentario,Infraestrutura e auditoria,15,id_infra_editor_comentario,0,0,3,,S,S,S
+infra_erro_php,Infraestrutura e auditoria,7,id_infra_erro_php,0,0,0,,S,S,S
+infra_log,Infraestrutura e auditoria,5,id_infra_log,0,0,1,seq_infra_log,S,S,S
+infra_navegador,Infraestrutura e auditoria,6,id_infra_navegador,0,0,1,seq_infra_navegador,S,S,S
+infra_parametro,Infraestrutura e auditoria,2,nome,0,0,0,,S,S,S
+infra_regra_auditoria,Infraestrutura e auditoria,3,id_infra_regra_auditoria,0,1,0,,S,S,S
+infra_regra_auditoria_recurso,Infraestrutura e auditoria,2,"id_infra_regra_auditoria,recurso",1,0,1,,S,S,S
+infra_sequencia,Infraestrutura e auditoria,4,nome_tabela,0,0,1,,S,S,S
+instalacao_federacao,Federação,12,id_instalacao_federacao,0,9,1,,S,S,S
+item_etapa,Outros,6,id_item_etapa,1,3,1,seq_item_etapa,S,S,S
+lembrete,Outros,11,id_lembrete,1,0,1,seq_lembrete,S,S,S
+lixeira,Outros,15,id_lixeira,3,0,3,seq_lixeira,S,S,S
+localizador,Outros,9,id_localizador,4,1,5,seq_localizador,S,S,N
+lugar_localizador,Outros,4,id_lugar_localizador,1,1,2,seq_lugar_localizador,S,S,S
+mapeamento_assunto,Classificação e catálogo,2,"id_assunto_destino,id_assunto_origem",2,0,2,,S,S,S
+marcador,Outros,6,id_marcador,1,2,1,seq_marcador,S,S,N
+modelo,Modelos e conhecimento,3,id_modelo,0,2,0,seq_modelo,S,S,S
+monitoramento_servico,Integrações e serviços,8,id_monitoramento_servico,1,0,3,seq_monitoramento_servico,S,S,S
+nivel_acesso_permitido,Acesso e segurança,3,id_nivel_acesso_permitido,1,0,1,seq_nivel_acesso_permitido,S,S,S
+notificacao,Comunicação,6,id_notificacao,4,1,4,seq_notificacao,S,S,N
+novidade,Comunicação,5,id_novidade,1,0,1,seq_novidade,S,S,S
+numeracao,Outros,6,id_numeracao,3,0,4,seq_numeracao,S,S,N
+observacao,Outros,5,id_observacao,2,0,3,seq_observacao,S,S,S
+operacao_servico,Integrações e serviços,6,id_operacao_servico,4,0,4,seq_operacao_servico,S,S,N
+ordenador_despesa,Outros,5,id_ordenador_despesa,3,0,3,seq_ordenador_despesa,S,S,S
+orgao,Identidade e organização,18,id_orgao,3,15,3,,S,S,N
+orgao_federacao,Federação,4,id_orgao_federacao,1,4,1,,S,S,S
+orgao_historico,Identidade e organização,6,id_orgao_historico,1,0,2,seq_orgao_historico,S,S,S
+pais,Contatos e participantes,2,id_pais,0,4,0,seq_pais,S,S,S
+parametro_acao_federacao,Federação,3,"id_acao_federacao,nome",1,0,1,,S,S,S
+participante,Contatos e participantes,6,id_participante,3,1,5,seq_participante,S,S,S
+pesquisa,Outros,4,id_pesquisa,2,1,2,seq_pesquisa,S,S,S
+plano_trabalho,Outros,4,id_plano_trabalho,0,5,0,seq_plano_trabalho,S,S,S
+procedimento,Núcleo processual,7,id_procedimento,4,9,5,,S,S,S
+protocolo,Núcleo processual,20,id_protocolo,4,21,20,seq_protocolo,S,S,N
+protocolo_federacao,Federação,5,id_protocolo_federacao,1,5,4,,S,S,S
+protocolo_idx,Outros,2,id_protocolo,0,0,1,,S,S,S
+protocolo_modelo,Modelos e conhecimento,8,id_protocolo_modelo,4,0,4,seq_protocolo_modelo,S,S,S
+publicacao,Publicação,16,id_publicacao,7,0,9,seq_publicacao,S,S,N
+publicacao_idx,Publicação,2,id_publicacao,0,0,1,,S,S,S
+publicacao_legado,Publicação,17,id_publicacao_legado,5,0,8,,S,S,N
+reabertura_programada,Tramitação e atividades,10,id_reabertura_programada,4,0,8,seq_reabertura_programada,S,S,S
+rel_acesso_ext_protocolo,Relacionamentos,2,"id_acesso_externo,id_protocolo",2,0,2,,S,S,S
+rel_acesso_ext_serie,Relacionamentos,2,"id_acesso_externo,id_serie",2,0,2,,S,S,S
+rel_assinante_unidade,Relacionamentos,2,"id_assinante,id_unidade",2,0,2,,S,S,S
+rel_aviso_orgao,Relacionamentos,2,"id_aviso,id_orgao",2,0,2,,S,S,S
+rel_base_conhec_tipo_proced,Relacionamentos,2,"id_base_conhecimento,id_tipo_procedimento",2,0,2,,S,S,S
+rel_bloco_protocolo,Relacionamentos,5,"id_bloco,id_protocolo",2,0,2,,S,S,S
+rel_bloco_unidade,Relacionamentos,15,"id_bloco,id_unidade",7,0,13,,S,S,S
+rel_controle_interno_orgao,Relacionamentos,2,"id_controle_interno,id_orgao",2,0,2,,S,S,S
+rel_controle_interno_serie,Relacionamentos,2,"id_controle_interno,id_serie",2,0,2,,S,S,S
+rel_controle_interno_tipo_proc,Relacionamentos,2,"id_controle_interno,id_tipo_procedimento",2,0,2,,S,S,S
+rel_controle_interno_unidade,Relacionamentos,2,"id_controle_interno,id_unidade",2,0,2,,S,S,S
+rel_grupo_contato,Relacionamentos,2,"id_contato,id_grupo_contato",2,0,2,,S,S,S
+rel_grupo_fed_orgao_fed,Relacionamentos,2,"id_grupo_federacao,id_orgao_federacao",2,0,2,,S,S,S
+rel_grupo_unidade_unidade,Relacionamentos,2,"id_grupo_unidade,id_unidade",2,0,2,,S,S,S
+rel_item_etapa_documento,Relacionamentos,2,"id_documento,id_item_etapa",2,0,2,,S,S,S
+rel_item_etapa_serie,Relacionamentos,2,"id_serie,id_item_etapa",2,0,2,,S,S,S
+rel_item_etapa_unidade,Relacionamentos,2,"id_unidade,id_item_etapa",2,0,2,,S,S,S
+rel_notificacao_documento,Relacionamentos,3,"id_documento,id_notificacao",2,0,3,,S,S,S
+rel_orgao_pesquisa,Relacionamentos,2,"id_orgao_1,id_orgao_2",2,0,2,,S,S,S
+rel_protocolo_assunto,Relacionamentos,5,"id_assunto_proxy,id_protocolo",4,0,4,,S,S,N
+rel_protocolo_atributo,Relacionamentos,3,"id_atributo,id_protocolo",2,0,2,,S,S,S
+rel_protocolo_protocolo,Relacionamentos,9,id_rel_protocolo_protocolo,4,1,5,seq_rel_protocolo_protocolo,S,S,N
+rel_secao_mod_cj_estilos_item,Relacionamentos,3,"id_conjunto_estilos_item,id_secao_modelo",2,0,2,,S,S,S
+rel_secao_modelo_estilo,Relacionamentos,3,"id_estilo,id_secao_modelo",2,0,2,,S,S,S
+rel_serie_assunto,Relacionamentos,3,"id_assunto_proxy,id_serie",2,0,2,,S,S,N
+rel_serie_plano_trabalho,Relacionamentos,2,"id_serie,id_plano_trabalho",2,0,2,,S,S,S
+rel_serie_veiculo_publicacao,Relacionamentos,2,"id_serie,id_veiculo_publicacao",2,0,2,,S,S,S
+rel_situacao_unidade,Relacionamentos,2,"id_situacao,id_unidade",2,0,2,,S,S,S
+rel_tipo_procedimento_assunto,Relacionamentos,3,"id_assunto_proxy,id_tipo_procedimento",2,0,2,,S,S,N
+rel_unidade_tipo_contato,Relacionamentos,4,id_rel_unidade_tipo_contato,2,0,3,seq_rel_unidade_tipo_contato,S,S,S
+rel_usuario_grupo_acomp,Relacionamentos,2,"id_usuario,id_grupo_acompanhamento",2,0,2,,S,S,S
+rel_usuario_grupo_bloco,Relacionamentos,2,"id_grupo_bloco,id_usuario",2,0,2,,S,S,S
+rel_usuario_marcador,Relacionamentos,2,"id_marcador,id_usuario",2,0,2,,S,S,S
+rel_usuario_tipo_prioridade,Relacionamentos,3,"id_unidade,id_usuario,id_tipo_prioridade",3,0,3,,S,S,S
+rel_usuario_tipo_proced,Relacionamentos,3,"id_usuario,id_tipo_procedimento,id_unidade",3,0,3,,S,S,S
+rel_usuario_usuario_unidade,Relacionamentos,3,"id_usuario,id_usuario_atribuicao,id_unidade",3,0,3,,S,S,S
+replicacao_federacao,Federação,9,id_replicacao_federacao,2,0,2,,S,S,S
+retorno_programado,Tramitação e atividades,9,id_retorno_programado,6,0,10,seq_retorno_programado,S,S,S
+revisao_avaliacao,Gestão documental,9,id_revisao_avaliacao,3,0,4,seq_revisao_avaliacao,S,S,S
+secao_documento,Editor e versões,13,id_secao_documento,3,1,4,seq_secao_documento,S,S,S
+secao_imprensa_nacional,Publicação,4,id_secao_imprensa_nacional,1,2,1,seq_secao_imprensa_nacional,S,S,S
+secao_modelo,Editor e versões,13,id_secao_modelo,1,3,2,seq_secao_modelo,S,S,S
+serie,Classificação e catálogo,16,id_serie,3,13,5,seq_serie,S,S,N
+serie_escolha,Documentos,2,"id_serie,id_unidade",2,0,2,,S,S,S
+serie_publicacao,Publicação,3,id_serie_publicacao,2,0,2,seq_serie_publicacao,S,S,S
+serie_restricao,Documentos,4,id_serie_restricao,3,0,3,seq_serie_restricao,S,S,S
+servico,Integrações e serviços,11,id_servico,1,2,2,seq_servico,S,S,S
+sinalizacao_federacao,Federação,5,"id_instalacao_federacao,id_protocolo_federacao,id_unidade",3,0,4,,S,S,S
+situacao,Outros,4,id_situacao,0,2,0,seq_situacao,S,S,S
+solicitacao_ouvidoria,Outros,11,id_procedimento,4,0,5,,S,S,S
+tabela_assuntos,Classificação e catálogo,4,id_tabela_assuntos,0,1,0,seq_tabela_assuntos,S,S,S
+tarefa,Tramitação e atividades,9,id_tarefa,0,1,1,seq_tarefa,S,S,N
+tarefa_instalacao,Tramitação e atividades,2,id_tarefa_instalacao,0,1,0,,S,S,S
+tarefa_plano_trabalho,Tramitação e atividades,2,id_tarefa_plano_trabalho,0,1,0,,S,S,S
+tarja_assinatura,Assinaturas,5,id_tarja_assinatura,0,1,0,seq_tarja_assinatura,S,S,S
+termo_uso,Acesso e segurança,10,id_termo_uso,2,0,2,seq_termo_uso,S,S,S
+texto_padrao_interno,Modelos e conhecimento,6,id_texto_padrao_interno,2,0,2,seq_texto_padrao_interno,S,S,N
+tipo_conferencia,Classificação e catálogo,3,id_tipo_conferencia,0,1,0,seq_tipo_conferencia,S,S,S
+tipo_contato,Contatos e participantes,6,id_tipo_contato,0,2,0,seq_tipo_contato,S,S,S
+tipo_formulario,Classificação e catálogo,4,id_tipo_formulario,0,3,0,seq_tipo_formulario,S,S,S
+tipo_localizador,Classificação e catálogo,6,id_tipo_localizador,1,1,3,seq_tipo_localizador,S,S,S
+tipo_prioridade,Classificação e catálogo,4,id_tipo_prioridade,0,2,0,seq_tipo_prioridade,S,S,S
+tipo_proced_restricao,Classificação e catálogo,4,id_tipo_proced_restricao,3,0,3,seq_tipo_proced_restricao,S,S,S
+tipo_procedimento,Classificação e catálogo,12,id_tipo_procedimento,2,9,4,seq_tipo_procedimento,S,S,N
+tipo_procedimento_escolha,Classificação e catálogo,2,"id_tipo_procedimento,id_unidade",2,0,2,,S,S,S
+tipo_suporte,Classificação e catálogo,3,id_tipo_suporte,0,1,1,seq_tipo_suporte,S,S,S
+titulo,Identidade e organização,4,id_titulo,0,2,0,seq_titulo,S,S,S
+tratamento,Identidade e organização,3,id_tratamento,0,1,1,seq_tratamento,S,S,S
+uf,Contatos e participantes,5,id_uf,1,2,1,seq_uf,S,S,N
+unidade,Identidade e organização,15,id_unidade,3,73,5,,S,S,N
+unidade_federacao,Federação,4,id_unidade_federacao,1,3,1,,S,S,S
+unidade_historico,Identidade e organização,7,id_unidade_historico,2,0,3,seq_unidade_historico,S,S,S
+unidade_publicacao,Publicação,2,id_unidade_publicacao,1,0,1,seq_unidade_publicacao,S,S,S
+usuario,Identidade e organização,16,id_usuario,3,52,5,,S,S,N
+usuario_configuracao,Identidade e organização,9,id_usuario,1,0,0,,S,S,S
+usuario_federacao,Federação,4,id_usuario_federacao,1,3,1,,S,S,S
+usuario_login,Identidade e organização,7,id_usuario,1,0,1,,S,S,S
+veiculo_imprensa_nacional,Publicação,3,id_veiculo_imprensa_nacional,0,3,0,seq_veiculo_imprensa_nacional,S,S,S
+veiculo_publicacao,Publicação,9,id_veiculo_publicacao,0,3,0,seq_veiculo_publicacao,S,S,S
+versao_secao_documento,Editor e versões,8,id_versao_secao_documento,3,0,4,seq_versao_secao_documento,S,S,S
+vocativo,Identidade e organização,3,id_vocativo,0,1,1,seq_vocativo,S,S,S

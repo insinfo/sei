@@ -1,0 +1,85 @@
+:host {
+  display: block;
+}
+
+.lista-catalogo {
+  background: #fff;
+  border: 1px solid #dbe2ea;
+  border-radius: 0.35rem;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 5%);
+}
+
+.lista-cabecalho {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid #dbe2ea;
+}
+
+.lista-cabecalho h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.lista-cabecalho span,
+.vazio {
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.tabela-rolagem {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eef2f7;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  color: #475569;
+  background: #f8fafc;
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+td {
+  color: #334155;
+  font-size: 0.875rem;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.situacao {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  color: #166534;
+  background: #dcfce7;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.situacao.inativa {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.vazio {
+  padding: 1.25rem 1rem;
+  margin: 0;
+}

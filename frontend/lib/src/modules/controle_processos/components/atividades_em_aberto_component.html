@@ -1,0 +1,75 @@
+<section class="atividades" [attr.aria-label]="titulo">
+  <header class="atividades-cabecalho">
+    <div>
+      <h2>{{ titulo }}</h2>
+      <p *ngIf="temUnidadeSelecionada">{{ descricaoConsulta }} por {{ descricaoUnidade }}.</p>
+      <p *ngIf="!temUnidadeSelecionada">Selecione uma unidade no contexto de desenvolvimento.</p>
+    </div>
+    <span class="contador" *ngIf="pagina != null">{{ total }} atividades</span>
+  </header>
+
+  <p class="carregando" *ngIf="exibirCarregamento">Carregando atividades em aberto...</p>
+
+  <section class="erro" *ngIf="exibirErro" role="alert">
+    <h3>Não foi possível carregar as atividades</h3>
+    <p>{{ mensagemErro }}</p>
+  </section>
+
+  <section class="vazio" *ngIf="exibirVazio">
+    <h3>{{ tituloVazio }}</h3>
+    <p>{{ descricaoUnidade }} não possui {{ descricaoVazia }} neste momento.</p>
+  </section>
+
+  <section class="vazio" *ngIf="exibirAguardandoUnidade">
+    <h3>Selecione uma unidade</h3>
+    <p>A consulta será carregada quando houver uma unidade disponível no contexto de desenvolvimento.</p>
+  </section>
+
+  <div class="tabela-rolagem" *ngIf="exibirTabela">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Processo</th>
+          <th scope="col">Tipo</th>
+          <th scope="col">Descrição</th>
+          <th scope="col">Unidade de origem</th>
+          <th scope="col">{{ descricaoDataAbertura }}</th>
+          <th scope="col">Prazo</th>
+          <th scope="col">Atribuído a</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of itens">
+          <td>{{ item.protocoloFormatado }}</td>
+          <td>{{ item.tipoProcedimentoNome }}</td>
+          <td>{{ item.descricao }}</td>
+          <td>{{ item.unidadeOrigemSigla }}</td>
+          <td>{{ item.dataAbertura }}</td>
+          <td>{{ item.dataPrazo }}</td>
+          <td>{{ item.usuarioAtribuicaoNome }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <nav
+    class="paginacao"
+    *ngIf="exibirPaginacao"
+    [attr.aria-label]="rotuloAcessivelPaginacao">
+    <p class="paginacao-resumo" aria-live="polite">{{ rotuloPaginacao }}</p>
+    <div class="paginacao-acoes">
+      <button
+        type="button"
+        [disabled]="botaoAnteriorDesabilitado"
+        (click)="solicitarPaginaAnterior()">
+        Anterior
+      </button>
+      <button
+        type="button"
+        [disabled]="botaoProximoDesabilitado"
+        (click)="solicitarProximaPagina()">
+        Próxima
+      </button>
+    </div>
+  </nav>
+</section>

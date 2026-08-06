@@ -1,0 +1,8 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - .dart_tool/**
+  errors:
+    uri_has_not_been_generated: ignore

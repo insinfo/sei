@@ -1,0 +1,38 @@
+<section class="resumo" *ngIf="resumo != null">
+  <div class="estado" *ngIf="status != null">
+    <span class="indicador"></span>
+    <span>API {{ status?.status }} · {{ status?.modo }}</span>
+    <span class="banco">Banco: {{ status?.bancoDados }}</span>
+  </div>
+
+  <div class="cartoes">
+    <article class="cartao">
+      <span>Tipos de processo</span>
+      <strong>{{ resumo?.tiposProcedimento }}</strong>
+    </article>
+    <article class="cartao">
+      <span>Tipos de documento</span>
+      <strong>{{ resumo?.series }}</strong>
+    </article>
+    <article class="cartao">
+      <span>Assuntos</span>
+      <strong>{{ resumo?.assuntos }}</strong>
+    </article>
+    <article class="cartao">
+      <span>Hipóteses legais</span>
+      <strong>{{ resumo?.hipotesesLegais }}</strong>
+    </article>
+    <article class="cartao">
+      <span>Extensões</span>
+      <strong>{{ resumo?.extensoesArquivo }}</strong>
+    </article>
+    <article class="cartao">
+      <span>Unidades</span>
+      <strong>{{ resumo?.unidades }}</strong>
+    </article>
+    <article class="cartao">
+      <span>Usuários</span>
+      <strong>{{ resumo?.usuarios }}</strong>
+    </article>
+  </div>
+</section>

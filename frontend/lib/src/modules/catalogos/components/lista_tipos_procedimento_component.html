@@ -1,0 +1,33 @@
+<div class="lista-catalogo">
+  <div class="lista-cabecalho">
+    <h2>Tipos de processo</h2>
+    <span>{{ itens.length }} itens</span>
+  </div>
+
+  <div class="tabela-rolagem" *ngIf="itens.isNotEmpty">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Código</th>
+          <th scope="col">Nome</th>
+          <th scope="col">Nível de acesso</th>
+          <th scope="col">Situação</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of itens">
+          <td>{{ item.idTipoProcedimento }}</td>
+          <td>{{ item.nome }}</td>
+          <td>{{ item.nivelAcessoSugestao }}</td>
+          <td>
+            <span class="situacao" [class.inativa]="!item.ativo">
+              {{ item.ativo ? 'Ativo' : 'Inativo' }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="vazio" *ngIf="itens.isEmpty">Nenhum tipo de processo encontrado.</p>
+</div>
