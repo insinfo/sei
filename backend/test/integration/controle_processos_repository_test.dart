@@ -1,23 +1,24 @@
 import 'package:sei_backend/sei_backend.dart';
 import 'package:test/test.dart';
 
+import '../support/escopo_repositorio_teste.dart';
+
 void main() {
   group('controle processos repository', () {
-    late SeiDatabaseService databaseService;
-    late ControleProcessosService controleProcessosService;
+    late EscopoRepositorioTeste escopo;
+    late ControleProcessosRepository controleProcessosRepository;
 
-    setUpAll(() {
-      final config = SeiAppConfig.carregar();
-      databaseService = SeiDatabaseService(config);
-      controleProcessosService = ControleProcessosService(databaseService);
+    setUpAll(() async {
+      escopo = await EscopoRepositorioTeste.criarSei();
+      controleProcessosRepository = escopo.make<ControleProcessosRepository>();
     });
 
     tearDownAll(() async {
-      await databaseService.dispose();
+      await escopo.dispose();
     });
 
     test('retorna pagina vazia sem criar dados ficticios', () async {
-      final pagina = await controleProcessosService.listarRecebidos(
+      final pagina = await controleProcessosRepository.listar(
         ControleProcessosFiltro(idUnidade: 110000001),
       );
 
@@ -28,7 +29,7 @@ void main() {
     });
 
     test('separa atividades geradas sem criar dados ficticios', () async {
-      final pagina = await controleProcessosService.listarGerados(
+      final pagina = await controleProcessosRepository.listar(
         ControleProcessosFiltro(
           idUnidade: 110000001,
           modo: ControleProcessosModo.gerados,

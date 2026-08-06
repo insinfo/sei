@@ -2,16 +2,11 @@ import 'package:sei_core/src/models/base_model.dart';
 
 /// Quantitativos dos catálogos necessários para validar a carga de referência.
 class CatalogoResumo extends BaseModel {
-  static const String assuntoTableName = 'assunto';
-  static const String assuntoFqtn = 'public.$assuntoTableName';
-  static const String hipoteseLegalTableName = 'hipotese_legal';
-  static const String hipoteseLegalFqtn = 'public.$hipoteseLegalTableName';
-  static const String arquivoExtensaoTableName = 'arquivo_extensao';
-  static const String arquivoExtensaoFqtn = 'public.$arquivoExtensaoTableName';
-  static const String unidadeTableName = 'unidade';
-  static const String unidadeFqtn = 'public.$unidadeTableName';
-  static const String usuarioTableName = 'usuario';
-  static const String usuarioFqtn = 'public.$usuarioTableName';
+  static const String assuntoFqtn = 'public.assunto';
+  static const String hipoteseLegalFqtn = 'public.hipotese_legal';
+  static const String arquivoExtensaoFqtn = 'public.arquivo_extensao';
+  static const String unidadeFqtn = 'public.unidade';
+  static const String usuarioFqtn = 'public.usuario';
 
   static const String tiposProcedimentoCol = 'tipos_procedimento';
   static const String seriesCol = 'series';

@@ -40,7 +40,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let item of itens">
-          <td>{{ item.protocoloFormatado }}</td>
+          <td><button type="button" class="link-processo" (click)="selecionarProcesso(item)">{{ item.protocoloFormatado }}</button></td>
           <td>{{ item.tipoProcedimentoNome }}</td>
           <td>{{ item.descricao }}</td>
           <td>{{ item.unidadeOrigemSigla }}</td>

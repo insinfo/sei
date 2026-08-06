@@ -44,10 +44,17 @@ class AtividadesEmAbertoComponent implements AfterChanges, OnDestroy {
 
   final StreamController<int> _paginaSolicitadaController =
       StreamController<int>.broadcast();
+  final StreamController<ProcessoRecebidoItem> _processoSelecionadoController =
+      StreamController<ProcessoRecebidoItem>.broadcast();
 
   /// Emite o deslocamento da página solicitada pelo usuário.
   @Output()
   Stream<int> get paginaSolicitada => _paginaSolicitadaController.stream;
+
+  /// Emite a atividade cujo processo deve ser aberto no contêiner da tela.
+  @Output()
+  Stream<ProcessoRecebidoItem> get processoSelecionado =>
+      _processoSelecionadoController.stream;
 
   List<ProcessoRecebidoItem> itens = const <ProcessoRecebidoItem>[];
   int total = 0;
@@ -113,6 +120,11 @@ class AtividadesEmAbertoComponent implements AfterChanges, OnDestroy {
     _paginaSolicitadaController.add(deslocamentoProximaPagina);
   }
 
+  /// Solicita a abertura do processo associado à atividade selecionada.
+  void selecionarProcesso(ProcessoRecebidoItem item) {
+    _processoSelecionadoController.add(item);
+  }
+
   void _atualizarPaginacao() {
     rotuloAcessivelPaginacao = 'Paginação de $titulo';
     deslocamentoPaginaAnterior = deslocamento - limite;
@@ -145,5 +157,6 @@ class AtividadesEmAbertoComponent implements AfterChanges, OnDestroy {
   @override
   void ngOnDestroy() {
     unawaited(_paginaSolicitadaController.close());
+    unawaited(_processoSelecionadoController.close());
   }
 }

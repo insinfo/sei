@@ -8,21 +8,21 @@ import 'package:sei_core/src/utils/sei_core_utils.dart';
 /// autenticada nem uma decisão de autorização.
 class ContextoDesenvolvimento extends BaseModel {
   static const String schemaName = 'public';
-  static const String usuarioTableName = 'usuario';
-  static const String usuarioFqtn = '$schemaName.$usuarioTableName';
+  static const String tableName = 'usuario';
+  static const String fqtn = '$schemaName.$tableName';
 
   static const String idUsuarioCol = 'id_usuario';
-  static const String idUsuarioFqCol = '$usuarioFqtn.$idUsuarioCol';
+  static const String idUsuarioFqCol = '$fqtn.$idUsuarioCol';
   static const String idOrgaoCol = 'id_orgao';
-  static const String idOrgaoFqCol = '$usuarioFqtn.$idOrgaoCol';
+  static const String idOrgaoFqCol = '$fqtn.$idOrgaoCol';
   static const String siglaUsuarioCol = 'sigla_usuario';
   static const String nomeUsuarioCol = 'nome_usuario';
   static const String usuarioSiglaSourceCol = 'sigla';
-  static const String usuarioSiglaFqCol = '$usuarioFqtn.$usuarioSiglaSourceCol';
+  static const String usuarioSiglaFqCol = '$fqtn.$usuarioSiglaSourceCol';
   static const String usuarioNomeSourceCol = 'nome';
-  static const String usuarioNomeFqCol = '$usuarioFqtn.$usuarioNomeSourceCol';
+  static const String usuarioNomeFqCol = '$fqtn.$usuarioNomeSourceCol';
   static const String usuarioAtivoSourceCol = 'sin_ativo';
-  static const String usuarioAtivoFqCol = '$usuarioFqtn.$usuarioAtivoSourceCol';
+  static const String usuarioAtivoFqCol = '$fqtn.$usuarioAtivoSourceCol';
   static const String unidadesCol = 'unidades';
   static const String idUnidadeInicialCol = 'id_unidade_inicial';
 

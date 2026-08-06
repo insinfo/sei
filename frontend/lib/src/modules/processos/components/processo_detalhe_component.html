@@ -1,0 +1,105 @@
+<section class="detalhe-processo" aria-label="Detalhe do processo">
+  <header class="detalhe-cabecalho">
+    <button type="button" class="botao-voltar" (click)="solicitarRetorno()">Voltar para a lista</button>
+    <div>
+      <p class="identificador">Processo SEI</p>
+      <h2 *ngIf="cabecalho != null">{{ cabecalho?.protocoloFormatado }}</h2>
+      <h2 *ngIf="cabecalho == null">Carregando processo</h2>
+    </div>
+  </header>
+
+  <p class="carregando" *ngIf="carregandoCabecalho">Carregando dados do processo...</p>
+
+  <section class="erro" *ngIf="mensagemErro.isNotEmpty" role="alert">
+    <h3>Não foi possível carregar o processo</h3>
+    <p>{{ mensagemErro }}</p>
+  </section>
+
+  <section class="dados-processo" *ngIf="cabecalho != null">
+    <h3>{{ cabecalho?.tipoProcedimentoNome }}</h3>
+    <p class="descricao">{{ cabecalho?.descricao }}</p>
+    <dl>
+      <div>
+        <dt>Situação</dt>
+        <dd>{{ cabecalho?.estadoProtocolo }}</dd>
+      </div>
+      <div>
+        <dt>Gerado em</dt>
+        <dd>{{ cabecalho?.dataGeracao }}</dd>
+      </div>
+      <div>
+        <dt>Unidade geradora</dt>
+        <dd>{{ cabecalho?.unidadeGeradoraSigla }} — {{ cabecalho?.unidadeGeradoraDescricao }}</dd>
+      </div>
+      <div>
+        <dt>Usuário gerador</dt>
+        <dd>{{ cabecalho?.usuarioGeradorNome }}</dd>
+      </div>
+      <div>
+        <dt>Nível de acesso</dt>
+        <dd>{{ cabecalho?.nivelAcessoLocal }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="secao-detalhe" *ngIf="cabecalho != null">
+    <header>
+      <div>
+        <h3>Documentos</h3>
+        <p>Árvore documental do processo, carregada sob demanda.</p>
+      </div>
+      <button type="button" (click)="solicitarDocumentos()" [disabled]="carregandoDocumentos">{{ documentosCarregados ? 'Atualizar documentos' : 'Carregar documentos' }}</button>
+    </header>
+
+    <p class="carregando" *ngIf="carregandoDocumentos">Carregando documentos...</p>
+    <p class="erro-simples" *ngIf="mensagemErroDocumentos.isNotEmpty" role="alert">{{ mensagemErroDocumentos }}</p>
+    <p class="vazio" *ngIf="documentosCarregados && documentos.isEmpty && !carregandoDocumentos">Não há documentos associados ativos neste processo.</p>
+
+    <div class="tabela-rolagem" *ngIf="documentos.isNotEmpty">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Documento</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">Unidade</th>
+            <th scope="col">Situação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of documentos">
+            <td>{{ item.nomeArvore ?? item.protocoloFormatado }}</td>
+            <td>{{ item.serieNome }}</td>
+            <td>{{ item.unidadeResponsavelSigla }}</td>
+            <td>{{ item.estadoDocumento }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button type="button" class="botao-mais" *ngIf="podeCarregarMaisDocumentos" (click)="solicitarMaisDocumentos()" [disabled]="carregandoDocumentos">Carregar mais documentos</button>
+  </section>
+
+  <section class="secao-detalhe" *ngIf="cabecalho != null">
+    <header>
+      <div>
+        <h3>Andamentos</h3>
+        <p>Histórico cronológico do processo, carregado sob demanda.</p>
+      </div>
+      <button type="button" (click)="solicitarAndamentos()" [disabled]="carregandoAndamentos">{{ andamentosCarregados ? 'Atualizar histórico' : 'Carregar histórico' }}</button>
+    </header>
+
+    <p class="carregando" *ngIf="carregandoAndamentos">Carregando histórico...</p>
+    <p class="erro-simples" *ngIf="mensagemErroAndamentos.isNotEmpty" role="alert">{{ mensagemErroAndamentos }}</p>
+    <p class="vazio" *ngIf="andamentosCarregados && andamentos.isEmpty && !carregandoAndamentos">Não há andamentos registrados para este processo.</p>
+
+    <ol class="linha-tempo" *ngIf="andamentos.isNotEmpty">
+      <li *ngFor="let item of andamentos">
+        <p class="data-andamento">{{ item.dataAbertura }}</p>
+        <p><strong>{{ item.tarefaNome ?? 'Andamento do processo' }}</strong></p>
+        <p>{{ item.unidadeSigla }} · {{ item.usuarioOrigemNome }}</p>
+      </li>
+    </ol>
+
+    <button type="button" class="botao-mais" *ngIf="podeCarregarMaisAndamentos" (click)="solicitarMaisAndamentos()" [disabled]="carregandoAndamentos">Carregar mais andamentos</button>
+  </section>
+</section>

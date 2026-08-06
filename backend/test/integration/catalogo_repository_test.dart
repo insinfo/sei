@@ -1,27 +1,31 @@
 import 'package:sei_backend/sei_backend.dart';
 import 'package:test/test.dart';
 
+import '../support/escopo_repositorio_teste.dart';
+
 void main() {
   group('catalogo repository', () {
-    late SeiDatabaseService databaseService;
-    late CatalogoService catalogoService;
+    late EscopoRepositorioTeste escopo;
+    late CatalogoRepository catalogoRepository;
 
-    setUpAll(() {
-      final config = SeiAppConfig.carregar();
-      databaseService = SeiDatabaseService(config);
-      catalogoService = CatalogoService(databaseService);
+    setUpAll(() async {
+      escopo = await EscopoRepositorioTeste.criarSei();
+      catalogoRepository = escopo.make<CatalogoRepository>();
     });
 
     tearDownAll(() async {
-      await databaseService.dispose();
+      await escopo.dispose();
     });
 
     test('le catalogos da referencia restaurada', () async {
-      final resumo = await catalogoService.obterResumo();
-      final tipos = await catalogoService.listarTiposProcedimento(
+      final CatalogoResumo resumo = await catalogoRepository.obterResumo();
+      final List<TipoProcedimento> tipos =
+          await catalogoRepository.listarTiposProcedimento(
         somenteAtivos: false,
       );
-      final series = await catalogoService.listarSeries(somenteAtivas: false);
+      final List<Serie> series = await catalogoRepository.listarSeries(
+        somenteAtivas: false,
+      );
 
       expect(resumo.tiposProcedimento, 318);
       expect(resumo.series, 254);

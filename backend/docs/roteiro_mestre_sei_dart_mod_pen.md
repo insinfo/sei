@@ -2111,54 +2111,66 @@ SEI5-PEN-009-envio-confirmacao-destinatario
 
 ## 28. Arquitetura concreta alinhada ao `new_sali`
 
-A estrutura inicial sugerida na seção 3 é conceitual. A implementação física deve
-seguir o padrão já provado no `C:\MyDartProjects\new_sali`, adaptado ao domínio do
-SEI:
+A estrutura inicial sugerida na seção 3 é conceitual. A implementação física
+adota o bom padrão do `C:\MyDartProjects\new_sali` — fábrica de repositório no
+DI do Angel e conexão no escopo da requisição — sem reproduzir seus trechos
+legados que criam repositórios diretamente em controllers ou services.
 
 ```text
-sei/
-  backend/
-    bin/                         # inicialização da API, workers e CLIs
-    lib/src/shared/              # bootstrap, DI, banco, middleware e utilitários
-    lib/src/modules/
-      administracao/
-      protocolo/
-      documentos/
-      assinatura/
-      pesquisa/
-      publicacao/
-      gestao_documental/
-      pen/
-    test/unit/
-    test/integration/
-    test/compatibility/
-  core/
-    lib/src/models/              # modelos e DTOs compartilhados
-    lib/src/enums/
-    lib/src/utils/
-    lib/sei_core.dart            # barrel público
-  frontend/
-    lib/src/shared/
-    lib/src/modules/
-      administracao/
-      protocolo/
-      documentos/
-      pen/
-    test/
-    web/
-  assinador_sei/                 # integração local, se autorizada e necessária
-  backend/docs/
-  backend/referencias/
+backend/lib/src/
+  app/
+    sei_app_config.dart
+    sei_application.dart          # cria Angel; só chama DI e rotas
+  di/
+    sei_dependency_injector.dart  # registra singletons e fábricas Angel
+  routes/
+    sei_routes.dart               # agrega rotas e middlewares globais
+  shared/
+    middlewares/                  # CORS e conexão por requisição
+    models/                       # DTOs exclusivos do backend
+    services/                     # infraestrutura compartilhada
+    utils/                        # extensões e utilitários genéricos
+  modules/
+    catalogos/
+      controllers/
+      repositories/
+      routes/catalogos_routes.dart
+    contexto/
+      controllers/
+      repositories/
+      routes/contexto_routes.dart
+    controle_processos/
+      controllers/
+      repositories/
+      routes/controle_processos_routes.dart
+    processos/
+      controllers/
+      repositories/
+      routes/processos_routes.dart
+    sip/
+      controllers/
+      repositories/
+      routes/sip_referencia_routes.dart
 ```
+
+Todo módulo novo segue a mesma topologia: `controllers/`, `repositories/` e
+`routes/<modulo>_routes.dart`. A pasta `services/` só é criada quando existir
+uma regra de negócio, transação, coordenação entre repositórios, integração
+externa ou outro efeito que justifique uma camada própria. Um service que só
+delega uma chamada para repository é proibido.
+
+O guia executável da arquitetura está em
+[`arquitetura_backend.md`](arquitetura_backend.md).
 
 ### 28.1 Responsabilidade das camadas
 
 | Camada | Responsabilidade | Não pode fazer |
 |---|---|---|
 | Model/DTO | contrato tipado, `fromMap()`, `toMap()`, enums e invariantes locais | abrir conexão ou conhecer HTTP |
-| Repository | SQL, filtros, locks, mapeamento de linhas e persistência | decidir fluxo de tela ou emitir resposta HTTP |
-| Service | regra de negócio, transação e efeitos coordenados | conter SQL literal |
-| Controller | transporte, autenticação, validação superficial e serialização | duplicar regra de domínio |
+| Repository | SQL, filtros, locks, mapeamento de linhas e persistência | decidir fluxo de tela, emitir resposta HTTP ou abrir conexão |
+| Service opcional | regra de negócio, transação, coordenação de vários repositories e efeitos externos | conter SQL literal ou existir apenas para delegar uma chamada |
+| Controller | transporte HTTP, validação superficial, resolução de dependência da requisição e serialização | construir repository, executar SQL ou duplicar regra de domínio |
+| Middleware | preocupação transversal, como CORS, autenticação e ciclo de conexão | conter regra de negócio de módulo |
 | Frontend service | cliente HTTP tipado, cache e adaptação do contrato | decidir permissão sem confirmação do backend |
 | Componente | estado visual estável e eventos de intenção | executar SQL, regra compartilhada ou parsing complexo |
 | Página de rota | ler rota, carregar agregado-base e ligar componentes | concentrar árvore, editor, PDF, PEN e modais em uma classe |
@@ -2170,24 +2182,100 @@ Todo DTO compartilhado entre backend e frontend deve:
 - ficar em `core/lib/src/models`;
 - implementar `BaseModel`;
 - possuir `fromMap()` e `toMap()` centralizados;
+- expor `toInsertMap()` e `toUpdateMap()` pelo contrato base; DTO de leitura
+  deve recusar explicitamente escrita sem semântica, e entidade persistível
+  deve sobrescrever os mapas removendo a chave primária;
+- possuir `==` e `hashCode`; para DTO imutável a comparação é por conteúdo,
+  enquanto entidade mutável futura deve sobrescrever por identidade de domínio;
 - usar tipos explícitos;
 - representar enums persistidos com `value` e `fromValue()`;
 - ser exportado em `core/lib/sei_core.dart`;
 - evitar `Map<String, dynamic>` fora da borda JSON/SQL;
 - permitir mutabilidade quando usado diretamente por binding ou estado de UI.
 
+Modelos de uma única tabela usam somente `tableName` e `fqtn`. Não criar
+constantes redundantes como `assuntoTableName`. DTOs de `JOIN` não têm uma
+única tabela: usam apenas os `fqtn` qualificados de cada origem, por exemplo
+`atividadeFqtn` e `usuarioFqtn`. Factories `nova()`/`vazia()` e `clone()` ou
+`copyWith()` são obrigatórias quando uma tela precisa iniciar ou copiar estado
+editável; não criar esses contratos artificiais para páginas e projeções de
+leitura.
+
 Criar desde o início identificadores semânticos para evitar misturar `id_protocolo`,
 `id_procedimento`, `id_documento` e números exibidos. Se wrappers de ID causarem
 problema de interoperabilidade com o Eloquent ou NgDart, manter `int` no wire,
 mas nunca reutilizar a mesma variável para chaves de entidades diferentes.
 
-### 28.3 Backend
+### 28.3 Backend: DI nativa do Angel, conexão e rotas
 
-Reaproveitar as ideias do `new_sali`:
+O Angel é o contêiner oficial do backend. Não usar `get_it` para as requisições
+HTTP e não encapsular a resolução em callbacks como
+`RepositorioInjetado.executar(...)`.
+
+1. `SeiDependencyInjector.configurar()` registra configurações, serviços de
+   banco, controladores sem estado e fábricas de repositories no contêiner da
+   aplicação.
+2. `MiddlewareConexaoBanco` abre uma conexão para a rota SEI ou SIP, registra
+   `Connection` no contêiner-filho de `RequestContext` e a libera ao término da
+   requisição quando não há pool.
+3. A fábrica registrada recebe essa conexão atual, por exemplo
+   `CatalogoRepository(container.make<Connection>())`.
+4. O controller resolve a dependência tipada com
+   `request.make<CatalogoRepository>()` e chama o método de repository.
+
+SEI e SIP usam middlewares de conexão distintos. Isso impede que uma rota SIP
+consuma por engano a conexão da Base de Referência SEI. Nenhuma conexão é aberta
+em preflight `OPTIONS`: o middleware CORS global responde `204` antes de uma
+rota de negócio.
+
+Para conexão sem pool, o middleware registra diretamente
+`request.shutdownHooks.add(connection.disconnect)`. O comportamento não é
+presumido: `backend/test/middlewares/conexao_banco_middleware_test.dart` envia
+uma requisição pelo `TestClient` do Angel e verifica o `disconnect()` após a
+resposta, além de confirmar que a conexão de pool não é desconectada pelo fim
+da requisição.
+
+`sei_application.dart` não recebe lógica de módulo. Seu único papel é criar o
+`Angel`, configurar DI e registrar rotas. `routes/sei_routes.dart` agrega os
+arquivos de rota dos módulos; não contém SQL, regra de negócio ou controller
+grande.
+
+O CORS fica exclusivamente em `shared/middlewares/cors_middleware.dart`,
+registrado uma vez no agregador. É proibido atribuir cabeçalhos CORS em
+controller, repository ou service e é proibido recriar
+`_aplicarCabecalhosCors(response)`.
+
+### 28.3.1 Regras SOLID e Clean Code obrigatórias
+
+- **Responsabilidade única:** app, DI, rota, middleware, controller,
+  repository e service têm as responsabilidades definidas acima.
+- **Aberto para extensão:** adicionar módulo exige seu arquivo de rota,
+  repository e registro de fábrica; não exige editar um controlador genérico.
+- **Inversão de dependência:** controllers dependem de contratos resolvidos no
+  contêiner da requisição, não de `Repository(connection)` criado manualmente.
+- **Segregação de interfaces:** infraestrutura de conexão expõe somente o
+  contrato necessário ao middleware; repository não conhece HTTP.
+- **Substituição segura:** uma implementação de serviço de conexão deve manter
+  o mesmo ciclo de vida da conexão registrado no `RequestContext`.
+- **Services por necessidade:** criar service apenas para regra de negócio,
+  transação, múltiplos repositories, auditoria, fila ou integração externa.
+  Para leitura simples, usar `controller → repository`.
+- **Legibilidade:** não misturar resolução do DI, chamada assíncrona,
+  transformação de lista e resposta HTTP em uma expressão densa. Usar variáveis
+  locais tipadas quando elas tornam o fluxo mais claro. Listas de `BaseModel`
+  usam `RespostaApiHttp.responderLista()` para não repetir callbacks de
+  serialização nos controllers.
+- **Sem repetição:** a fábrica de cada repository fica apenas no DI e o CORS
+  apenas no middleware global. Não repetir cabeçalhos, criação de conexão ou
+  `Repository(connection)` nas camadas de negócio.
+- **Fronteiras tipadas:** repository retorna model/DTO; controller chama
+  `toMap()` apenas ao serializar a resposta. `Map<String, dynamic>` fica na
+  borda de SQL, JSON e resposta.
+
+Reaproveitar ainda:
 
 - Angel3 para a API interna autenticada;
 - Shelf apenas onde a API pública ou integração isolada justificar;
-- `get_it` para composição de dependências;
 - `eloquent` como construtor de query, sem permitir que ele defina o contrato;
 - Redis para sessão, cache e sinalização, nunca como fonte única de verdade;
 - filas persistidas em banco para operações que não podem ser perdidas;
@@ -2196,9 +2284,9 @@ Reaproveitar as ideias do `new_sali`:
 - `belatuk_range_header` ou equivalente para streaming de documentos;
 - workers com reserva transacional, lease, heartbeat, retry e dead letter.
 
-Ao contrário de trechos legados do `new_sali`, a nova implementação deve manter
-SQL exclusivamente em repositories e transações nos services. O projeto SEI não
-deve copiar dívidas técnicas apenas porque elas existem no sistema de inspiração.
+SQL permanece exclusivamente em repositories. Transações pertencem a services
+quando um fluxo realmente coordenar mais de uma operação; em uma consulta
+simples, não criar service artificial.
 
 ### 28.4 Frontend AngularDart
 
@@ -2979,7 +3067,8 @@ obter diff zero após nova restauração.
 
 O laboratório local possui as bases oficiais de referência `sei_5_0_0` e
 `sip_5_0_0`, restauradas em PostgreSQL 16.7 com codificação `LATIN1`. A fonte
-canônica é o clone local de `sei-db-ref-executivo`; a cópia UTF-8 que contém
+canônica é o clone local de `sei-db-ref-executivo`, espelhado byte a byte em
+`resources/`; a cópia UTF-8 que contém
 caracteres `�` permanece somente como evidência de corrupção e não participa de
 leitura, testes ou restauração.
 
@@ -2993,6 +3082,8 @@ Já existe uma primeira fatia somente leitura em Dart:
 - DTOs compartilhados para catálogo, contexto de desenvolvimento, unidades e
   fila de atividades;
 - API para catálogos, contexto de desenvolvimento, Recebidos e Gerados;
+- conexão SIP independente e rota somente leitura para sistemas ativos, sem
+  autenticar, criar sessão ou interpretar permissões;
 - interface AngularDart que carrega o usuário de referência e permite escolher
   uma unidade real da base antes de consultar a fila;
 - separação comprovada entre as abas Recebidos (`atividade.sin_inicial = 'N'`)

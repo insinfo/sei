@@ -19,17 +19,24 @@
     </section>
 
     <section *ngIf="!carregando && erro == null">
-      <sei-catalogo-resumo [resumo]="resumo" [status]="status"></sei-catalogo-resumo>
+      <sei-processo-detalhe
+        *ngIf="detalheProcessoAberto"
+        [idProcesso]="idProcessoSelecionado"
+        (retornoSolicitado)="fecharDetalheProcesso()">
+      </sei-processo-detalhe>
 
-      <sei-contexto-desenvolvimento
-        [contexto]="contextoDesenvolvimento"
-        [idUnidadeSelecionada]="idUnidadeSelecionada"
-        [carregando]="carregandoContexto"
-        [erro]="erroContexto"
-        (unidadeSelecionada)="selecionarUnidade($event)">
-      </sei-contexto-desenvolvimento>
+      <section *ngIf="!detalheProcessoAberto">
+        <sei-catalogo-resumo [resumo]="resumo" [status]="status"></sei-catalogo-resumo>
 
-      <nav class="abas" aria-label="Consultas disponíveis">
+        <sei-contexto-desenvolvimento
+          [contexto]="contextoDesenvolvimento"
+          [idUnidadeSelecionada]="idUnidadeSelecionada"
+          [carregando]="carregandoContexto"
+          [erro]="erroContexto"
+          (unidadeSelecionada)="selecionarUnidade($event)">
+        </sei-contexto-desenvolvimento>
+
+        <nav class="abas" aria-label="Consultas disponíveis">
         <button
           type="button"
           [class.ativa]="abaTiposSelecionada"
@@ -58,21 +65,21 @@
           (click)="selecionarProcessosGerados()">
           Processos gerados
         </button>
-      </nav>
+        </nav>
 
-      <section class="consulta" *ngIf="abaTiposSelecionada">
+        <section class="consulta" *ngIf="abaTiposSelecionada">
         <label for="filtro-tipos">Filtrar tipos de processo</label>
         <input id="filtro-tipos" type="search" placeholder="Nome ou código" (input)="filtrarTipos($event)">
         <sei-lista-tipos-procedimento [itens]="tiposProcedimentoVisiveis"></sei-lista-tipos-procedimento>
-      </section>
+        </section>
 
-      <section class="consulta" *ngIf="abaSeriesSelecionada">
+        <section class="consulta" *ngIf="abaSeriesSelecionada">
         <label for="filtro-series">Filtrar tipos de documento</label>
         <input id="filtro-series" type="search" placeholder="Nome ou código" (input)="filtrarSeries($event)">
         <sei-lista-series [itens]="seriesVisiveis"></sei-lista-series>
-      </section>
+        </section>
 
-      <section class="consulta" *ngIf="abaAtividadesSelecionada">
+        <section class="consulta" *ngIf="abaAtividadesSelecionada">
         <sei-atividades-em-aberto
           [titulo]="tituloAtividades"
           [descricaoConsulta]="descricaoAtividades"
@@ -83,11 +90,12 @@
           [carregando]="carregandoAtividades"
           [erro]="erroAtividades"
           [unidadeSelecionada]="unidadeSelecionadaRotulo"
-          (paginaSolicitada)="solicitarPaginaAtividades($event)">
+          (paginaSolicitada)="solicitarPaginaAtividades($event)"
+          (processoSelecionado)="abrirProcesso($event)">
         </sei-atividades-em-aberto>
-      </section>
+        </section>
 
-      <section class="consulta" *ngIf="abaProcessosGeradosSelecionada">
+        <section class="consulta" *ngIf="abaProcessosGeradosSelecionada">
         <sei-atividades-em-aberto
           [titulo]="tituloProcessosGerados"
           [descricaoConsulta]="descricaoProcessosGerados"
@@ -98,8 +106,10 @@
           [carregando]="carregandoProcessosGerados"
           [erro]="erroProcessosGerados"
           [unidadeSelecionada]="unidadeSelecionadaRotulo"
-          (paginaSolicitada)="solicitarPaginaProcessosGerados($event)">
+          (paginaSolicitada)="solicitarPaginaProcessosGerados($event)"
+          (processoSelecionado)="abrirProcesso($event)">
         </sei-atividades-em-aberto>
+        </section>
       </section>
     </section>
   </main>

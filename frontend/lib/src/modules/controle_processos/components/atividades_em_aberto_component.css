@@ -109,6 +109,22 @@ tbody tr:last-child td {
   border-bottom: 0;
 }
 
+.link-processo {
+  padding: 0;
+  color: #075985;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.link-processo:focus-visible {
+  outline: 3px solid #38bdf8;
+  outline-offset: 2px;
+}
+
 .paginacao {
   display: flex;
   align-items: center;

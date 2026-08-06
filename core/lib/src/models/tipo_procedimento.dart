@@ -36,6 +36,20 @@ class TipoProcedimento extends BaseModel {
     this.idPlanoTrabalho,
   });
 
+  /// Cria um tipo de procedimento inicial para formulário ainda não salvo.
+  factory TipoProcedimento.novo() {
+    return TipoProcedimento(
+      idTipoProcedimento: 0,
+      nome: '',
+      ativo: false,
+      nivelAcessoSugestao: '0',
+      interno: false,
+      ouvidoria: false,
+      individual: false,
+      ouvidoriaAnonimo: false,
+    );
+  }
+
   factory TipoProcedimento.fromMap(Map<String, dynamic> map) {
     return TipoProcedimento(
       idTipoProcedimento: map[idCol] as int,
@@ -68,18 +82,36 @@ class TipoProcedimento extends BaseModel {
     );
   }
 
-  final int idTipoProcedimento;
-  final int? idHipoteseLegalSugestao;
-  final String nome;
-  final String? descricao;
-  final bool ativo;
-  final String nivelAcessoSugestao;
-  final bool interno;
-  final bool ouvidoria;
-  final bool individual;
-  final String? grauSigiloSugestao;
-  final int? idPlanoTrabalho;
-  final bool ouvidoriaAnonimo;
+  int idTipoProcedimento;
+  int? idHipoteseLegalSugestao;
+  String nome;
+  String? descricao;
+  bool ativo;
+  String nivelAcessoSugestao;
+  bool interno;
+  bool ouvidoria;
+  bool individual;
+  String? grauSigiloSugestao;
+  int? idPlanoTrabalho;
+  bool ouvidoriaAnonimo;
+
+  /// Cria uma cópia independente para edição transitória de interface.
+  TipoProcedimento clone() {
+    return TipoProcedimento(
+      idTipoProcedimento: idTipoProcedimento,
+      idHipoteseLegalSugestao: idHipoteseLegalSugestao,
+      nome: nome,
+      descricao: descricao,
+      ativo: ativo,
+      nivelAcessoSugestao: nivelAcessoSugestao,
+      interno: interno,
+      ouvidoria: ouvidoria,
+      individual: individual,
+      grauSigiloSugestao: grauSigiloSugestao,
+      idPlanoTrabalho: idPlanoTrabalho,
+      ouvidoriaAnonimo: ouvidoriaAnonimo,
+    );
+  }
 
   @override
   Map<String, dynamic> toMap() {
@@ -97,5 +129,17 @@ class TipoProcedimento extends BaseModel {
       idPlanoTrabalhoCol: idPlanoTrabalho,
       ouvidoriaAnonimoCol: SeiCoreUtils.boolParaSimNao(ouvidoriaAnonimo),
     };
+  }
+
+  @override
+  Map<String, dynamic> toInsertMap() {
+    final Map<String, dynamic> mapa = toMap();
+    mapa.remove(idCol);
+    return mapa;
+  }
+
+  @override
+  Map<String, dynamic> toUpdateMap() {
+    return toInsertMap();
   }
 }

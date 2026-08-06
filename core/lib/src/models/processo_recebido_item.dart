@@ -3,148 +3,134 @@ import 'package:sei_core/src/utils/sei_core_utils.dart';
 
 /// Atividade aberta de processo, projetada para o Controle de Processos.
 class ProcessoRecebidoItem extends BaseModel {
-  static const String schemaName = 'public';
+  static const schemaName = 'public';
 
-  static const String atividadeTableName = 'atividade';
-  static const String atividadeFqtn = '$schemaName.$atividadeTableName';
-  static const String protocoloTableName = 'protocolo';
-  static const String protocoloFqtn = '$schemaName.$protocoloTableName';
-  static const String procedimentoTableName = 'procedimento';
-  static const String procedimentoFqtn = '$schemaName.$procedimentoTableName';
-  static const String tipoProcedimentoTableName = 'tipo_procedimento';
-  static const String tipoProcedimentoFqtn =
-      '$schemaName.$tipoProcedimentoTableName';
-  static const String unidadeTableName = 'unidade';
-  static const String unidadeFqtn = '$schemaName.$unidadeTableName';
-  static const String tarefaTableName = 'tarefa';
-  static const String tarefaFqtn = '$schemaName.$tarefaTableName';
-  static const String usuarioTableName = 'usuario';
-  static const String usuarioFqtn = '$schemaName.$usuarioTableName';
+  static const atividadeFqtn = '$schemaName.atividade';
+  static const protocoloFqtn = '$schemaName.protocolo';
+  static const procedimentoFqtn = '$schemaName.procedimento';
+  static const tipoProcedimentoFqtn = '$schemaName.tipo_procedimento';
+  static const unidadeFqtn = '$schemaName.unidade';
+  static const tarefaFqtn = '$schemaName.tarefa';
+  static const usuarioFqtn = '$schemaName.usuario';
 
-  static const String unidadeOrigemAlias = 'unidade_origem';
-  static const String unidadeOrigemAliasTable =
-      '$unidadeFqtn as $unidadeOrigemAlias';
-  static const String usuarioAtribuicaoAlias = 'usuario_atribuicao';
-  static const String usuarioAtribuicaoAliasTable =
+  static const unidadeOrigemAlias = 'unidade_origem';
+  static const unidadeOrigemAliasTable = '$unidadeFqtn as $unidadeOrigemAlias';
+  static const usuarioAtribuicaoAlias = 'usuario_atribuicao';
+  static const usuarioAtribuicaoAliasTable =
       '$usuarioFqtn as $usuarioAtribuicaoAlias';
-  static const String usuarioAtividadeAlias = 'usuario_atividade';
-  static const String usuarioAtividadeAliasTable =
+  static const usuarioAtividadeAlias = 'usuario_atividade';
+  static const usuarioAtividadeAliasTable =
       '$usuarioFqtn as $usuarioAtividadeAlias';
 
-  static const String atividadeIdCol = 'id_atividade';
-  static const String atividadeIdFqCol = '$atividadeFqtn.$atividadeIdCol';
-  static const String atividadeIdProtocoloCol = 'id_protocolo';
-  static const String atividadeIdProtocoloFqCol =
+  static const atividadeIdCol = 'id_atividade';
+  static const atividadeIdFqCol = '$atividadeFqtn.$atividadeIdCol';
+  static const atividadeIdProtocoloCol = 'id_protocolo';
+  static const atividadeIdProtocoloFqCol =
       '$atividadeFqtn.$atividadeIdProtocoloCol';
-  static const String atividadeIdUnidadeCol = 'id_unidade';
-  static const String atividadeIdUnidadeFqCol =
+  static const atividadeIdUnidadeCol = 'id_unidade';
+  static const atividadeIdUnidadeFqCol =
       '$atividadeFqtn.$atividadeIdUnidadeCol';
-  static const String atividadeIdUnidadeOrigemCol = 'id_unidade_origem';
-  static const String atividadeIdUnidadeOrigemFqCol =
+  static const atividadeIdUnidadeOrigemCol = 'id_unidade_origem';
+  static const atividadeIdUnidadeOrigemFqCol =
       '$atividadeFqtn.$atividadeIdUnidadeOrigemCol';
-  static const String atividadeIdTarefaCol = 'id_tarefa';
-  static const String atividadeIdTarefaFqCol =
-      '$atividadeFqtn.$atividadeIdTarefaCol';
-  static const String atividadeIdUsuarioAtribuicaoCol = 'id_usuario_atribuicao';
-  static const String atividadeIdUsuarioAtribuicaoFqCol =
+  static const atividadeIdTarefaCol = 'id_tarefa';
+  static const atividadeIdTarefaFqCol = '$atividadeFqtn.$atividadeIdTarefaCol';
+  static const atividadeIdUsuarioAtribuicaoCol = 'id_usuario_atribuicao';
+  static const atividadeIdUsuarioAtribuicaoFqCol =
       '$atividadeFqtn.$atividadeIdUsuarioAtribuicaoCol';
-  static const String atividadeIdUsuarioCol = 'id_usuario';
-  static const String atividadeIdUsuarioFqCol =
+  static const atividadeIdUsuarioCol = 'id_usuario';
+  static const atividadeIdUsuarioFqCol =
       '$atividadeFqtn.$atividadeIdUsuarioCol';
-  static const String atividadeAberturaCol = 'dth_abertura';
-  static const String atividadeAberturaFqCol =
-      '$atividadeFqtn.$atividadeAberturaCol';
-  static const String atividadeConclusaoCol = 'dth_conclusao';
-  static const String atividadeConclusaoFqCol =
+  static const atividadeAberturaCol = 'dth_abertura';
+  static const atividadeAberturaFqCol = '$atividadeFqtn.$atividadeAberturaCol';
+  static const atividadeConclusaoCol = 'dth_conclusao';
+  static const atividadeConclusaoFqCol =
       '$atividadeFqtn.$atividadeConclusaoCol';
-  static const String atividadePrazoCol = 'dta_prazo';
-  static const String atividadePrazoFqCol = '$atividadeFqtn.$atividadePrazoCol';
-  static const String atividadeInicialSourceCol = 'sin_inicial';
-  static const String atividadeInicialFqCol =
+  static const atividadePrazoCol = 'dta_prazo';
+  static const atividadePrazoFqCol = '$atividadeFqtn.$atividadePrazoCol';
+  static const atividadeInicialSourceCol = 'sin_inicial';
+  static const atividadeInicialFqCol =
       '$atividadeFqtn.$atividadeInicialSourceCol';
-  static const String atividadeTipoVisualizacaoCol = 'tipo_visualizacao';
-  static const String atividadeTipoVisualizacaoFqCol =
+  static const atividadeTipoVisualizacaoCol = 'tipo_visualizacao';
+  static const atividadeTipoVisualizacaoFqCol =
       '$atividadeFqtn.$atividadeTipoVisualizacaoCol';
 
-  static const String protocoloIdCol = 'id_protocolo';
-  static const String protocoloIdFqCol = '$protocoloFqtn.$protocoloIdCol';
-  static const String protocoloFormatadoSourceCol = 'protocolo_formatado';
-  static const String protocoloFormatadoFqCol =
+  static const protocoloIdCol = 'id_protocolo';
+  static const protocoloIdFqCol = '$protocoloFqtn.$protocoloIdCol';
+  static const protocoloFormatadoSourceCol = 'protocolo_formatado';
+  static const protocoloFormatadoFqCol =
       '$protocoloFqtn.$protocoloFormatadoSourceCol';
-  static const String protocoloDescricaoSourceCol = 'descricao';
-  static const String protocoloDescricaoFqCol =
+  static const protocoloDescricaoSourceCol = 'descricao';
+  static const protocoloDescricaoFqCol =
       '$protocoloFqtn.$protocoloDescricaoSourceCol';
-  static const String protocoloEstadoSourceCol = 'sta_estado';
-  static const String protocoloEstadoFqCol =
+  static const protocoloEstadoSourceCol = 'sta_estado';
+  static const protocoloEstadoFqCol =
       '$protocoloFqtn.$protocoloEstadoSourceCol';
 
-  static const String procedimentoIdCol = 'id_procedimento';
-  static const String procedimentoIdFqCol =
-      '$procedimentoFqtn.$procedimentoIdCol';
-  static const String procedimentoIdTipoCol = 'id_tipo_procedimento';
-  static const String procedimentoIdTipoFqCol =
+  static const procedimentoIdCol = 'id_procedimento';
+  static const procedimentoIdFqCol = '$procedimentoFqtn.$procedimentoIdCol';
+  static const procedimentoIdTipoCol = 'id_tipo_procedimento';
+  static const procedimentoIdTipoFqCol =
       '$procedimentoFqtn.$procedimentoIdTipoCol';
 
-  static const String tipoProcedimentoIdCol = 'id_tipo_procedimento';
-  static const String tipoProcedimentoIdFqCol =
+  static const tipoProcedimentoIdCol = 'id_tipo_procedimento';
+  static const tipoProcedimentoIdFqCol =
       '$tipoProcedimentoFqtn.$tipoProcedimentoIdCol';
-  static const String tipoProcedimentoNomeSourceCol = 'nome';
-  static const String tipoProcedimentoNomeFqCol =
+  static const tipoProcedimentoNomeSourceCol = 'nome';
+  static const tipoProcedimentoNomeFqCol =
       '$tipoProcedimentoFqtn.$tipoProcedimentoNomeSourceCol';
 
-  static const String unidadeIdCol = 'id_unidade';
-  static const String unidadeIdFqCol = '$unidadeFqtn.$unidadeIdCol';
-  static const String unidadeSiglaSourceCol = 'sigla';
-  static const String unidadeSiglaFqCol = '$unidadeFqtn.$unidadeSiglaSourceCol';
-  static const String unidadeDescricaoSourceCol = 'descricao';
-  static const String unidadeDescricaoFqCol =
+  static const unidadeIdCol = 'id_unidade';
+  static const unidadeIdFqCol = '$unidadeFqtn.$unidadeIdCol';
+  static const unidadeSiglaSourceCol = 'sigla';
+  static const unidadeSiglaFqCol = '$unidadeFqtn.$unidadeSiglaSourceCol';
+  static const unidadeDescricaoSourceCol = 'descricao';
+  static const unidadeDescricaoFqCol =
       '$unidadeFqtn.$unidadeDescricaoSourceCol';
-  static const String unidadeOrigemIdFqCol =
-      '$unidadeOrigemAlias.$unidadeIdCol';
-  static const String unidadeOrigemSiglaFqCol =
+  static const unidadeOrigemIdFqCol = '$unidadeOrigemAlias.$unidadeIdCol';
+  static const unidadeOrigemSiglaFqCol =
       '$unidadeOrigemAlias.$unidadeSiglaSourceCol';
-  static const String unidadeOrigemDescricaoFqCol =
+  static const unidadeOrigemDescricaoFqCol =
       '$unidadeOrigemAlias.$unidadeDescricaoSourceCol';
 
-  static const String tarefaIdCol = 'id_tarefa';
-  static const String tarefaIdFqCol = '$tarefaFqtn.$tarefaIdCol';
-  static const String tarefaNomeSourceCol = 'nome';
-  static const String tarefaNomeFqCol = '$tarefaFqtn.$tarefaNomeSourceCol';
+  static const tarefaIdCol = 'id_tarefa';
+  static const tarefaIdFqCol = '$tarefaFqtn.$tarefaIdCol';
+  static const tarefaNomeSourceCol = 'nome';
+  static const tarefaNomeFqCol = '$tarefaFqtn.$tarefaNomeSourceCol';
 
-  static const String usuarioIdCol = 'id_usuario';
-  static const String usuarioAtribuicaoIdFqCol =
+  static const usuarioIdCol = 'id_usuario';
+  static const usuarioAtribuicaoIdFqCol =
       '$usuarioAtribuicaoAlias.$usuarioIdCol';
-  static const String usuarioAtividadeIdFqCol =
-      '$usuarioAtividadeAlias.$usuarioIdCol';
-  static const String usuarioNomeSourceCol = 'nome';
-  static const String usuarioAtribuicaoNomeFqCol =
+  static const usuarioAtividadeIdFqCol = '$usuarioAtividadeAlias.$usuarioIdCol';
+  static const usuarioNomeSourceCol = 'nome';
+  static const usuarioAtribuicaoNomeFqCol =
       '$usuarioAtribuicaoAlias.$usuarioNomeSourceCol';
-  static const String usuarioAtividadeNomeFqCol =
+  static const usuarioAtividadeNomeFqCol =
       '$usuarioAtividadeAlias.$usuarioNomeSourceCol';
 
-  static const String idAtividadeCol = 'id_atividade';
-  static const String idProcessoCol = 'id_processo';
-  static const String protocoloFormatadoCol = 'protocolo_formatado';
-  static const String descricaoCol = 'descricao';
-  static const String estadoProtocoloCol = 'estado_protocolo';
-  static const String idTipoProcedimentoCol = 'id_tipo_procedimento';
-  static const String tipoProcedimentoNomeCol = 'tipo_procedimento_nome';
-  static const String idUnidadeCol = 'id_unidade';
-  static const String unidadeSiglaCol = 'unidade_sigla';
-  static const String unidadeDescricaoCol = 'unidade_descricao';
-  static const String idUnidadeOrigemCol = 'id_unidade_origem';
-  static const String unidadeOrigemSiglaCol = 'unidade_origem_sigla';
-  static const String unidadeOrigemDescricaoCol = 'unidade_origem_descricao';
-  static const String idTarefaCol = 'id_tarefa';
-  static const String tarefaNomeCol = 'tarefa_nome';
-  static const String idUsuarioAtribuicaoCol = 'id_usuario_atribuicao';
-  static const String usuarioAtribuicaoNomeCol = 'usuario_atribuicao_nome';
-  static const String idUsuarioAtividadeCol = 'id_usuario_atividade';
-  static const String usuarioAtividadeNomeCol = 'usuario_atividade_nome';
-  static const String dataAberturaCol = 'data_abertura';
-  static const String dataPrazoCol = 'data_prazo';
-  static const String atividadeInicialCol = 'atividade_inicial';
-  static const String tipoVisualizacaoCol = 'tipo_visualizacao';
+  static const idAtividadeCol = 'id_atividade';
+  static const idProcessoCol = 'id_processo';
+  static const protocoloFormatadoCol = 'protocolo_formatado';
+  static const descricaoCol = 'descricao';
+  static const estadoProtocoloCol = 'estado_protocolo';
+  static const idTipoProcedimentoCol = 'id_tipo_procedimento';
+  static const tipoProcedimentoNomeCol = 'tipo_procedimento_nome';
+  static const idUnidadeCol = 'id_unidade';
+  static const unidadeSiglaCol = 'unidade_sigla';
+  static const unidadeDescricaoCol = 'unidade_descricao';
+  static const idUnidadeOrigemCol = 'id_unidade_origem';
+  static const unidadeOrigemSiglaCol = 'unidade_origem_sigla';
+  static const unidadeOrigemDescricaoCol = 'unidade_origem_descricao';
+  static const idTarefaCol = 'id_tarefa';
+  static const tarefaNomeCol = 'tarefa_nome';
+  static const idUsuarioAtribuicaoCol = 'id_usuario_atribuicao';
+  static const usuarioAtribuicaoNomeCol = 'usuario_atribuicao_nome';
+  static const idUsuarioAtividadeCol = 'id_usuario_atividade';
+  static const usuarioAtividadeNomeCol = 'usuario_atividade_nome';
+  static const dataAberturaCol = 'data_abertura';
+  static const dataPrazoCol = 'data_prazo';
+  static const atividadeInicialCol = 'atividade_inicial';
+  static const tipoVisualizacaoCol = 'tipo_visualizacao';
 
   ProcessoRecebidoItem({
     required this.idAtividade,
@@ -267,7 +253,7 @@ class ProcessoRecebidoItem extends BaseModel {
 
   @override
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
+    final map = <String, dynamic>{
       idAtividadeCol: idAtividade,
       idProcessoCol: idProcesso,
       protocoloFormatadoCol: protocoloFormatado,
@@ -292,5 +278,7 @@ class ProcessoRecebidoItem extends BaseModel {
       atividadeInicialCol: SeiCoreUtils.boolParaSimNao(atividadeInicial),
       tipoVisualizacaoCol: tipoVisualizacao,
     };
+
+    return map;
   }
 }

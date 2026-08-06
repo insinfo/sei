@@ -11,6 +11,7 @@ import 'package:sei_frontend/src/modules/controle_processos/components/atividade
 import 'package:sei_frontend/src/modules/controle_processos/services/controle_processos_service.dart';
 import 'package:sei_frontend/src/modules/contexto_desenvolvimento/components/contexto_desenvolvimento_component.dart';
 import 'package:sei_frontend/src/modules/contexto_desenvolvimento/services/contexto_desenvolvimento_service.dart';
+import 'package:sei_frontend/src/modules/processos/components/processo_detalhe_component.dart';
 
 @Component(
   selector: 'sei-app',
@@ -23,6 +24,7 @@ import 'package:sei_frontend/src/modules/contexto_desenvolvimento/services/conte
     ListaSeriesComponent,
     AtividadesEmAbertoComponent,
     ContextoDesenvolvimentoComponent,
+    ProcessoDetalheComponent,
   ],
   providers: <Provider>[
     ClassProvider(CatalogosService),
@@ -82,6 +84,8 @@ class AppComponent implements OnInit {
   int deslocamentoProcessosGerados = 0;
   int _versaoConsultaAtividades = 0;
   int _versaoConsultaProcessosGerados = 0;
+  bool detalheProcessoAberto = false;
+  String idProcessoSelecionado = '';
 
   @override
   void ngOnInit() {
@@ -285,6 +289,18 @@ class AppComponent implements OnInit {
       return;
     }
     unawaited(carregarProcessosGerados(deslocamento: deslocamento));
+  }
+
+  /// Abre o detalhe da atividade selecionada preservando o estado da lista.
+  void abrirProcesso(ProcessoRecebidoItem item) {
+    idProcessoSelecionado = item.idProcesso;
+    detalheProcessoAberto = true;
+  }
+
+  /// Retorna à lista sem recarregar a unidade ou perder a paginação atual.
+  void fecharDetalheProcesso() {
+    detalheProcessoAberto = false;
+    idProcessoSelecionado = '';
   }
 
   /// Carrega a referência de usuário e unidades sem iniciar autenticação SIP.

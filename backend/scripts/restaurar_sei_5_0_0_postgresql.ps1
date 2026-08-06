@@ -27,10 +27,16 @@ function Testar-IdentificadorSql {
 function Invocar-Psql {
     param(
         [string]$Base,
-        [string[]]$Argumentos
+        [string[]]$Argumentos,
+        [switch]$SuprimirSaida
     )
 
-    & psql -X -q -v ON_ERROR_STOP=1 -h $Servidor -p $Porta -U $Usuario -d $Base @Argumentos
+    if ($SuprimirSaida) {
+        & psql -X -q -v ON_ERROR_STOP=1 -h $Servidor -p $Porta -U $Usuario -d $Base @Argumentos | Out-Null
+    }
+    else {
+        & psql -X -q -v ON_ERROR_STOP=1 -h $Servidor -p $Porta -U $Usuario -d $Base @Argumentos
+    }
     if ($LASTEXITCODE -ne 0) {
         throw "O psql falhou ao executar uma operação na base $Base."
     }
@@ -108,10 +114,14 @@ if ([string]::IsNullOrWhiteSpace($Banco)) {
     $Banco = $nomeBancoPadrao
 }
 if ([string]::IsNullOrWhiteSpace($Fonte)) {
-    $diretorioReferencias = Split-Path -Parent $PSScriptRoot
-    $diretorioBackend = Split-Path -Parent $diretorioReferencias
-    $diretorioRaiz = Split-Path -Parent $diretorioBackend
-    $Fonte = Join-Path $diretorioRaiz "resources\$arquivoPadrao"
+    $diretorioRaiz = [System.IO.DirectoryInfo]$PSScriptRoot
+    while ($null -ne $diretorioRaiz -and -not (Test-Path -LiteralPath (Join-Path $diretorioRaiz.FullName 'resources'))) {
+        $diretorioRaiz = $diretorioRaiz.Parent
+    }
+    if ($null -eq $diretorioRaiz) {
+        throw 'Não foi possível localizar a pasta resources a partir do script de restauração.'
+    }
+    $Fonte = Join-Path $diretorioRaiz.FullName "resources\$arquivoPadrao"
 }
 
 Testar-IdentificadorSql -Valor $Usuario -Nome 'usuário'
@@ -152,7 +162,7 @@ if ($bancoExiste -eq 't') {
 }
 
 Invocar-Psql -Base 'postgres' -Argumentos @('-c', "CREATE DATABASE $Banco WITH OWNER = $Usuario TEMPLATE = template0 ENCODING = 'LATIN1' LC_COLLATE = 'C' LC_CTYPE = 'C';")
-Invocar-Psql -Base $Banco -Argumentos @('-f', (Resolve-Path -LiteralPath $Fonte))
+Invocar-Psql -Base $Banco -SuprimirSaida -Argumentos @('-f', (Resolve-Path -LiteralPath $Fonte))
 
 $metricas = Obter-ValorPsql -Base $Banco -Sql $sqlMetricas
 $amostra = Obter-ValorPsql -Base $Banco -Sql $sqlAmostra

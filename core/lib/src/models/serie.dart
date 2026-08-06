@@ -44,6 +44,23 @@ class Serie extends BaseModel {
     this.descricao,
   });
 
+  /// Cria uma série inicial para formulários ainda não persistidos.
+  factory Serie.nova() {
+    return Serie(
+      idSerie: 0,
+      nome: '',
+      ativo: false,
+      interessado: false,
+      destinatario: false,
+      numeracao: '',
+      assinaturaPublicacao: false,
+      aplicabilidade: '',
+      interno: false,
+      usuarioExterno: false,
+      valorMonetario: false,
+    );
+  }
+
   factory Serie.fromMap(Map<String, dynamic> map) {
     return Serie(
       idSerie: map[idCol] as int,
@@ -86,22 +103,44 @@ class Serie extends BaseModel {
     );
   }
 
-  final int idSerie;
-  final int? idModeloEdoc;
-  final int? idGrupoSerie;
-  final int? idModelo;
-  final int? idTipoFormulario;
-  final String nome;
-  final String? descricao;
-  final bool ativo;
-  final bool interessado;
-  final bool destinatario;
-  final String numeracao;
-  final bool assinaturaPublicacao;
-  final String aplicabilidade;
-  final bool interno;
-  final bool usuarioExterno;
-  final bool valorMonetario;
+  int idSerie;
+  int? idModeloEdoc;
+  int? idGrupoSerie;
+  int? idModelo;
+  int? idTipoFormulario;
+  String nome;
+  String? descricao;
+  bool ativo;
+  bool interessado;
+  bool destinatario;
+  String numeracao;
+  bool assinaturaPublicacao;
+  String aplicabilidade;
+  bool interno;
+  bool usuarioExterno;
+  bool valorMonetario;
+
+  /// Cria uma cópia independente para edição transitória de interface.
+  Serie clone() {
+    return Serie(
+      idSerie: idSerie,
+      idModeloEdoc: idModeloEdoc,
+      idGrupoSerie: idGrupoSerie,
+      idModelo: idModelo,
+      idTipoFormulario: idTipoFormulario,
+      nome: nome,
+      descricao: descricao,
+      ativo: ativo,
+      interessado: interessado,
+      destinatario: destinatario,
+      numeracao: numeracao,
+      assinaturaPublicacao: assinaturaPublicacao,
+      aplicabilidade: aplicabilidade,
+      interno: interno,
+      usuarioExterno: usuarioExterno,
+      valorMonetario: valorMonetario,
+    );
+  }
 
   @override
   Map<String, dynamic> toMap() {
@@ -124,5 +163,17 @@ class Serie extends BaseModel {
       usuarioExternoCol: SeiCoreUtils.boolParaSimNao(usuarioExterno),
       valorMonetarioCol: SeiCoreUtils.boolParaSimNao(valorMonetario),
     };
+  }
+
+  @override
+  Map<String, dynamic> toInsertMap() {
+    final Map<String, dynamic> mapa = toMap();
+    mapa.remove(idCol);
+    return mapa;
+  }
+
+  @override
+  Map<String, dynamic> toUpdateMap() {
+    return toInsertMap();
   }
 }

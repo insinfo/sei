@@ -31,5 +31,14 @@ void main() {
         throwsFormatException,
       );
     });
+
+    test('prepara mapas de escrita sem a chave primaria', () {
+      final TipoProcedimento tipo = TipoProcedimento.novo();
+
+      expect(tipo.idTipoProcedimento, 0);
+      expect(tipo.clone(), tipo);
+      expect(tipo.toInsertMap(), isNot(contains(TipoProcedimento.idCol)));
+      expect(tipo.toUpdateMap(), isNot(contains(TipoProcedimento.idCol)));
+    });
   });
 }
