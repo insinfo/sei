@@ -188,6 +188,96 @@ mecanismo, e deve orientar o service de remoção quando ele for implementado.
 `sin_ativo = 'S'` juntos — nenhuma linha com `sin_ultimo = 'S'` e
 `sin_ativo = 'N'` foi observada, mas o filtro duplo é defensivo.
 
+## Códigos de `bloco.sta_tipo` e `bloco.sta_estado`
+
+Cruzamento das 113 linhas de `bloco` do dump histórico, das 83 linhas de
+`rel_bloco_protocolo` e das 204 linhas de `rel_bloco_unidade`.
+
+### `sta_tipo`
+
+| Código | Ocorrências | Conteúdo cruzado (`rel_bloco_protocolo` → `protocolo.sta_protocolo`) | Leitura |
+| --- | ---: | --- | --- |
+| `A` | 95 | 77 relações, sempre com protocolo `G` (documento gerado no editor) | Assinatura |
+| `I` | 16 | 5 relações, sempre com protocolo `P` (processo) | Interno |
+| `R` | 2 | 1 relação, sempre com protocolo `P` (processo) | Reunião |
+
+Cobertura de 100% dos dados observados (95 + 16 + 2 = 113), sem código
+residual. O cruzamento por conteúdo é exato: nenhum bloco `A` contém
+processo, e nenhum bloco `I`/`R` contém documento. As iniciais batem com as
+três seções do manual do usuário — "Bloco de Assinatura", "Bloco de reunião"
+e "Blocos Internos" (`backend/referencias/manuais_sei_publicos/html/SEI/Blocos.html`)
+—, cuja descrição funcional confirma exatamente essa divisão de conteúdo.
+Implementado em `TipoBloco`.
+
+### `sta_estado`
+
+| Código | Ocorrências | Cruzado com `sta_tipo` | Leitura |
+| --- | ---: | --- | --- |
+| `A` | 48 | 30 Assinatura, 16 Interno, 2 Reunião | Gerado |
+| `D` | 64 | só Assinatura | Disponibilizado |
+| `C` | 1 | só Assinatura | Concluído |
+
+Cobertura de 100% dos dados observados (48 + 64 + 1 = 113), sem código
+residual. O manual do usuário lista cinco rótulos na coluna Estado da tela
+Blocos — "Podendo ser: Gerado, Disponibilizado, Recebido, Retornado e
+Concluído" — mas o próprio texto do manual mostra que **"Recebido" não é um
+quarto código**: é o mesmo bloco disponibilizado (`D`), rotulado como
+"Recebido" quando a tela é aberta pela unidade destinatária em vez da
+geradora ("os Blocos recebidos de outras unidades são identificados pelo
+estado 'Recebido'"). `A` corresponde a "Gerado": o manual descreve o bloco
+recém-criado, antes de qualquer disponibilização, como estando "no estado
+'Gerado'" — e é exatamente o único código visto nos blocos Interno e Reunião
+desta amostra, que nunca chegam a `D`/`C` nela (consistente com a seção
+"Blocos Internos" do manual, que não descreve nenhuma ação de
+disponibilizar para esse tipo).
+
+**"Retornado" fica de fora, como lacuna.** Nenhuma das 113 linhas do dump
+histórico grava esse estado em `bloco.sta_estado`. A única fonte de código
+literal encontrada para um "estado de bloco" é
+`TramiteEmBlocoRN::$TE_ABERTO = 'A'`, `$TE_DISPONIBILIZADO = 'D'`,
+`$TE_RETORNADO = 'R'`, `$TE_CONCLUIDO = 'C'` e
+`$TE_CONCLUIDO_PARCIALMENTE = 'P'`, em
+`mod-sei-pen/src/rn/TramiteEmBlocoRN.php` — mas essa classe mapeia
+`md_pen_bloco`, uma tabela **distinta** que o módulo PEN usa para trâmite em
+lote (`TramiteEmBlocoDTO::getStrNomeTabela()` retorna `'md_pen_bloco'`), não
+`public.bloco`. A estrutura de `md_pen_bloco` é quase idêntica à de `bloco`
+(`id_unidade`, `id_usuario`, `descricao`, `idx_bloco`, `sta_tipo`,
+`sta_estado`), o que sugere fortemente que os dois compartilham o mesmo
+domínio de código — inclusive a coincidência dos três valores já comprovados
+(`A`/`D`/`C`) — mas é evidência de tabela vizinha, não da própria coluna, e
+por isso `R` (Retornado) não foi declarado em `EstadoBloco`. A hipótese mais
+provável é que a devolução de um bloco seja tratada por
+`rel_bloco_unidade.sin_retornado` (sempre `N` nas 204 linhas observadas, sem
+nenhuma ocorrência `S` para confirmar), e não por um quarto código de
+`sta_estado` — nome e propósito da coluna batem com a ação "Devolver Bloco"
+do manual, mas sem linha real com `sin_retornado = 'S'` para provar o
+mecanismo. Implementado em `EstadoBloco`, só com `gerado`, `disponibilizado`
+e `concluido`.
+
+As sinalizações de `rel_bloco_unidade` — `sin_prioridade`, `sin_revisao` e
+`sin_comentario`, cada uma com seu par `id_usuario_*`/`dth_*` — batem
+exatamente com as três sinalizações "Prioritário", "Revisado" e "Comentado"
+descritas no manual, inclusive o detalhe de que passar o cursor sobre o
+ícone mostra "o usuário que inseriu a sinalização... bem como a data e a
+hora". Nesta amostra, `sin_revisao = 'S'` aparece em 2 das 204 linhas e
+`sin_prioridade = 'S'` em 1; `sin_comentario` e `sin_retornado` são sempre
+`N`. Implementado em `RelacaoBlocoUnidade`, sem enum (são apenas booleanos).
+
+## Lacuna: `base_conhecimento` sem dado real
+
+`base_conhecimento` e `rel_base_conhec_tipo_proced` têm **zero linhas**,
+tanto na Base de Referência restaurada quanto no dump histórico local. Não
+há nenhum dado real para cruzar `sta_estado` nem `sta_documento` dessa
+tabela, e por isso nenhum enum foi declarado para esses dois campos:
+`BaseConhecimento.estado` e `BaseConhecimento.documento` (assim como
+`ProcessoBaseConhecimento.estado`/`documento`) preservam o código bruto do
+banco, sem transformação, no mesmo padrão já usado para
+`Acompanhamento.tipoVisualizacao` e `Anotacao.situacao`. A leitura estrutural
+(`join` de `procedimento` → `rel_base_conhec_tipo_proced` →
+`base_conhecimento` → `unidade`/`usuario`) foi validada contra o esquema da
+Base de Referência e não apresenta ambiguidade nenhuma — a lacuna é
+exclusivamente nos dois códigos de domínio de uma letra.
+
 ## Fixture transacional
 
 A Base de Referência não pode ganhar dado sintético, mas as consultas precisam
@@ -247,3 +337,10 @@ Referência volta exatamente ao estado anterior.
   `andamento_marcador`), mas zero linhas tanto na Base de Referência quanto no
   dump histórico. Sem nenhuma linha real para cruzar, este recurso ficou fora
   desta etapa.
+- **Estado "Retornado" de `bloco.sta_estado`.** O manual descreve cinco
+  rótulos de estado, mas os dados reais só comprovam três códigos
+  (`A`/`D`/`C`); nenhuma linha do dump histórico grava um quarto código. A
+  hipótese — devolução tratada por `rel_bloco_unidade.sin_retornado` — não
+  tem nenhuma ocorrência `S` para confirmá-la.
+- **`base_conhecimento.sta_estado` e `sta_documento`.** Zero linhas na Base
+  de Referência e no dump histórico; sem enum, código bruto preservado.

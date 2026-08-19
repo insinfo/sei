@@ -1,0 +1,23 @@
+<section class="secao-detalhe">
+  <header>
+    <div>
+      <h3>Andamentos</h3>
+      <p>Histórico cronológico do processo, carregado sob demanda.</p>
+    </div>
+    <button type="button" (click)="solicitarAndamentos()" [disabled]="carregando">{{ carregado ? 'Atualizar histórico' : 'Carregar histórico' }}</button>
+  </header>
+
+  <p class="carregando" *ngIf="carregando">Carregando histórico...</p>
+  <p class="erro-simples" *ngIf="mensagemErro.isNotEmpty" role="alert">{{ mensagemErro }}</p>
+  <p class="vazio" *ngIf="carregado && andamentos.isEmpty && !carregando">Não há andamentos registrados para este processo.</p>
+
+  <ol class="linha-tempo" *ngIf="andamentos.isNotEmpty">
+    <li *ngFor="let item of andamentos">
+      <p class="data-andamento">{{ item.dataAbertura }}</p>
+      <p><strong>{{ item.tarefaNome ?? 'Andamento do processo' }}</strong></p>
+      <p>{{ item.unidadeSigla }} · {{ item.usuarioOrigemNome }}</p>
+    </li>
+  </ol>
+
+  <button type="button" class="botao-mais" *ngIf="podeCarregarMais" (click)="solicitarMais()" [disabled]="carregando">Carregar mais andamentos</button>
+</section>

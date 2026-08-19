@@ -1,0 +1,10 @@
+// `.erro`, `.carregando` e `.botao-voltar` são estilo compartilhado — ver o
+// comentário correspondente em `frontend/web/style.scss`. Este arquivo cobre
+// só o que é específico desta página.
+:host {
+  display: block;
+}
+
+.acoes-topo {
+  margin-bottom: 1rem;
+}

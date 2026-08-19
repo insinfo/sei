@@ -27,6 +27,16 @@ class ProcessoDetalheService {
   static const String _cabecalhoPath = 'cabecalho';
   static const String _documentosPath = 'documentos';
   static const String _andamentosPath = 'andamentos';
+  static const String _unidadesAbertasPath = 'unidades-abertas';
+  static const String _relacionadosPath = 'relacionados';
+  static const String _participantesPath = 'participantes';
+  static const String _anotacoesPath = 'anotacoes';
+  static const String _marcadoresPath = 'marcadores';
+  static const String _acompanhamentosPath = 'acompanhamentos';
+  static const String _controlesPrazoPath = 'controles-prazo';
+  static const String _retornosProgramadosPath = 'retornos-programados';
+  static const String _conteudoPath = 'conteudo';
+  static const String _idUnidadeParametro = 'idUnidade';
 
   final http.Client _cliente;
   final Uri _baseUri;
@@ -68,6 +78,120 @@ class ProcessoDetalheService {
     );
   }
 
+  /// Lista as unidades em que o processo está aberto no momento.
+  ///
+  /// O estado aberto/concluído do SEI é por par processo-unidade, não do
+  /// processo inteiro: por isso o retorno é uma lista, não um booleano único.
+  Future<List<ProcessoUnidadeAberta>> listarUnidadesAbertas(
+    String idProcesso,
+  ) {
+    return _buscarLista(
+      idProcesso: idProcesso,
+      recurso: _unidadesAbertasPath,
+      converter: ProcessoUnidadeAberta.fromMap,
+    );
+  }
+
+  /// Lista os processos relacionados ao processo consultado, nos dois
+  /// sentidos do vínculo.
+  Future<List<ProcessoRelacionado>> listarRelacionados(String idProcesso) {
+    return _buscarLista(
+      idProcesso: idProcesso,
+      recurso: _relacionadosPath,
+      converter: ProcessoRelacionado.fromMap,
+    );
+  }
+
+  /// Lista os interessados, remetentes e destinatários vinculados ao
+  /// processo.
+  Future<List<ProcessoParticipante>> listarParticipantes(String idProcesso) {
+    return _buscarLista(
+      idProcesso: idProcesso,
+      recurso: _participantesPath,
+      converter: ProcessoParticipante.fromMap,
+    );
+  }
+
+  /// Lista as anotações do processo visíveis para a unidade informada.
+  ///
+  /// A visibilidade da anotação é exclusiva da unidade que a criou, por isso
+  /// [idUnidade] é obrigatório.
+  Future<List<ProcessoAnotacao>> listarAnotacoes(
+    String idProcesso,
+    int idUnidade,
+  ) {
+    return _buscarLista(
+      idProcesso: idProcesso,
+      recurso: _anotacoesPath,
+      parametros: <String, String>{_idUnidadeParametro: idUnidade.toString()},
+      converter: ProcessoAnotacao.fromMap,
+    );
+  }
+
+  /// Lista os marcadores vigentes atribuídos ao processo.
+  Future<List<ProcessoMarcador>> listarMarcadores(String idProcesso) {
+    return _buscarLista(
+      idProcesso: idProcesso,
+      recurso: _marcadoresPath,
+      converter: ProcessoMarcador.fromMap,
+    );
+  }
+
+  /// Lista os acompanhamentos especiais registrados para o processo.
+  Future<List<ProcessoAcompanhamento>> listarAcompanhamentos(
+    String idProcesso,
+  ) {
+    return _buscarLista(
+      idProcesso: idProcesso,
+      recurso: _acompanhamentosPath,
+      converter: ProcessoAcompanhamento.fromMap,
+    );
+  }
+
+  /// Lista os prazos internos de controle da unidade informada sobre o
+  /// processo.
+  ///
+  /// É um recurso de organização interna: [idUnidade] é obrigatório porque
+  /// outras unidades não têm acesso aos prazos que não criaram.
+  Future<List<ProcessoControlePrazo>> listarControlesPrazo(
+    String idProcesso,
+    int idUnidade,
+  ) {
+    return _buscarLista(
+      idProcesso: idProcesso,
+      recurso: _controlesPrazoPath,
+      parametros: <String, String>{_idUnidadeParametro: idUnidade.toString()},
+      converter: ProcessoControlePrazo.fromMap,
+    );
+  }
+
+  /// Lista os retornos programados (prazos de devolução) do processo.
+  Future<List<ProcessoRetornoProgramado>> listarRetornosProgramados(
+    String idProcesso,
+  ) {
+    return _buscarLista(
+      idProcesso: idProcesso,
+      recurso: _retornosProgramadosPath,
+      converter: ProcessoRetornoProgramado.fromMap,
+    );
+  }
+
+  /// Busca o conteúdo de um documento do processo, interno ou externo.
+  ///
+  /// Para documento externo, o retorno é apenas o ponteiro do anexo (nome,
+  /// tamanho e hash) — o byte do arquivo não vem nesta chamada.
+  Future<ProcessoDocumentoConteudo> obterConteudoDocumento(
+    String idProcesso,
+    String idDocumento,
+  ) {
+    return _buscarObjeto(
+      idProcesso: idProcesso,
+      recurso: _documentosPath,
+      segmentosExtras: <String>[idDocumento, _conteudoPath],
+      converter: ProcessoDocumentoConteudo.fromMap,
+    );
+  }
+
   Map<String, String> _parametrosPaginacao({
     required String? cursor,
     required int limite,
@@ -82,11 +206,13 @@ class ProcessoDetalheService {
     required String idProcesso,
     required String recurso,
     required T Function(Map<String, dynamic> map) converter,
+    List<String> segmentosExtras = const <String>[],
     Map<String, String>? parametros,
   }) async {
     final Uri uri = _criarUri(
       idProcesso: idProcesso,
       recurso: recurso,
+      segmentosExtras: segmentosExtras,
       parametros: parametros,
     );
     final http.Response resposta = await _buscar(uri);
@@ -108,9 +234,49 @@ class ProcessoDetalheService {
     }
   }
 
+  Future<List<T>> _buscarLista<T>({
+    required String idProcesso,
+    required String recurso,
+    required T Function(Map<String, dynamic> map) converter,
+    Map<String, String>? parametros,
+  }) async {
+    final Uri uri = _criarUri(
+      idProcesso: idProcesso,
+      recurso: recurso,
+      parametros: parametros,
+    );
+    final http.Response resposta = await _buscar(uri);
+    final Object? corpo = _decodificarJson(resposta, recurso);
+    if (corpo is! List<Object?>) {
+      throw ProcessoDetalheApiException(
+        'A API retornou uma lista inválida para "$recurso".',
+      );
+    }
+
+    final List<T> itens = <T>[];
+    for (final Object? item in corpo) {
+      if (item is! Map<String, dynamic>) {
+        throw ProcessoDetalheApiException(
+          'A API retornou um item inválido para "$recurso".',
+        );
+      }
+      try {
+        itens.add(converter(item));
+      } on ProcessoDetalheApiException {
+        rethrow;
+      } catch (_) {
+        throw ProcessoDetalheApiException(
+          'A API retornou um contrato inválido para "$recurso".',
+        );
+      }
+    }
+    return itens;
+  }
+
   Uri _criarUri({
     required String idProcesso,
     required String recurso,
+    List<String> segmentosExtras = const <String>[],
     Map<String, String>? parametros,
   }) {
     final List<String> segmentosBase = _baseUri.pathSegments
@@ -122,6 +288,7 @@ class ProcessoDetalheService {
         _processosPath,
         idProcesso,
         recurso,
+        ...segmentosExtras,
       ],
       queryParameters: parametros,
     );

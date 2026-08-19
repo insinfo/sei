@@ -1,0 +1,37 @@
+<section class="secao-detalhe">
+  <header>
+    <div>
+      <h3>Unidades abertas</h3>
+      <p>Unidades em que o processo está aberto agora. O estado é por unidade, não do processo inteiro.</p>
+    </div>
+  </header>
+
+  <p class="carregando" *ngIf="carregando">Carregando unidades abertas...</p>
+  <p class="erro-simples" *ngIf="mensagemErro.isNotEmpty" role="alert">{{ mensagemErro }}</p>
+  <p class="vazio" *ngIf="carregado && unidades.isEmpty && !carregando">O processo não está aberto em nenhuma unidade.</p>
+
+  <div class="tabela-rolagem" *ngIf="unidades.isNotEmpty">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Unidade</th>
+          <th scope="col">Origem</th>
+          <th scope="col">Aberto desde</th>
+          <th scope="col">Última atividade</th>
+          <th scope="col">Atividades abertas</th>
+          <th scope="col">Atribuído a</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let unidade of unidades">
+          <td>{{ unidade.unidadeSigla }} — {{ unidade.unidadeDescricao }}</td>
+          <td>{{ unidade.geradoNaUnidade ? 'Gerado nesta unidade' : 'Recebido' }}</td>
+          <td>{{ unidade.dataAbertura }}</td>
+          <td>{{ unidade.dataUltimaAtividade }}</td>
+          <td>{{ unidade.atividadesAbertas }}</td>
+          <td>{{ unidade.usuarioAtribuicaoNome ?? '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

@@ -19,11 +19,12 @@
     </section>
 
     <section *ngIf="!carregando && erro == null">
-      <sei-processo-detalhe
+      <sei-processo-detalhe-page
         *ngIf="detalheProcessoAberto"
         [idProcesso]="idProcessoSelecionado"
+        [idUnidade]="idUnidadeSelecionada"
         (retornoSolicitado)="fecharDetalheProcesso()">
-      </sei-processo-detalhe>
+      </sei-processo-detalhe-page>
 
       <section *ngIf="!detalheProcessoAberto">
         <sei-catalogo-resumo [resumo]="resumo" [status]="status"></sei-catalogo-resumo>

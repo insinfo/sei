@@ -1,0 +1,26 @@
+// O cartão (.secao-detalhe) e os textos de estado são estilo compartilhado —
+// ver o comentário correspondente em `frontend/web/style.scss`.
+:host {
+  display: block;
+}
+
+.linha-tempo {
+  padding-left: 1.25rem;
+  margin: 1rem 0 0;
+}
+
+.linha-tempo li {
+  padding: 0 0 0.75rem 0.5rem;
+  border-left: 2px solid #7dd3fc;
+}
+
+.linha-tempo p {
+  margin: 0.2rem 0;
+  color: #475569;
+}
+
+.data-andamento {
+  color: #075985 !important;
+  font-size: 0.8rem;
+  font-weight: 700;
+}

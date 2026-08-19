@@ -1,0 +1,35 @@
+<section class="secao-detalhe">
+  <header>
+    <div>
+      <h3>Retorno programado</h3>
+      <p>Prazos de devolução do processo. Não retira o acesso da unidade nem devolve automaticamente.</p>
+    </div>
+  </header>
+
+  <p class="carregando" *ngIf="carregando">Carregando retornos programados...</p>
+  <p class="erro-simples" *ngIf="mensagemErro.isNotEmpty" role="alert">{{ mensagemErro }}</p>
+  <p class="vazio" *ngIf="carregado && retornos.isEmpty && !carregando">Não há retorno programado para este processo.</p>
+
+  <div class="tabela-rolagem" *ngIf="retornos.isNotEmpty">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Prazo programado</th>
+          <th scope="col">Situação</th>
+          <th scope="col">Unidade que demandou</th>
+          <th scope="col">Unidade que deve devolver</th>
+          <th scope="col">Por</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of retornos">
+          <td>{{ item.dataProgramada }}</td>
+          <td>{{ item.cumprido ? 'Cumprido' : 'Pendente' }}</td>
+          <td>{{ item.unidadeEnvioSigla }}</td>
+          <td>{{ item.unidadeRetornoSigla }}</td>
+          <td>{{ item.usuarioNome }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

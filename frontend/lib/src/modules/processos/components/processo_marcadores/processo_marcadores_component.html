@@ -1,0 +1,33 @@
+<section class="secao-detalhe">
+  <header>
+    <div>
+      <h3>Marcadores</h3>
+      <p>Marcadores vigentes atribuídos ao processo.</p>
+    </div>
+  </header>
+
+  <p class="carregando" *ngIf="carregando">Carregando marcadores...</p>
+  <p class="erro-simples" *ngIf="mensagemErro.isNotEmpty" role="alert">{{ mensagemErro }}</p>
+  <p class="vazio" *ngIf="carregado && marcadores.isEmpty && !carregando">Não há marcadores atribuídos a este processo.</p>
+
+  <div class="tabela-rolagem" *ngIf="marcadores.isNotEmpty">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Marcador</th>
+          <th scope="col">Texto</th>
+          <th scope="col">Aplicado em</th>
+          <th scope="col">Por</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of marcadores">
+          <td>{{ item.marcadorNome }}</td>
+          <td>{{ item.texto ?? '—' }}</td>
+          <td>{{ item.dataExecucao }}</td>
+          <td>{{ item.usuarioNome }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

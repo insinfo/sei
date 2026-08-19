@@ -2359,6 +2359,58 @@ Regras obrigatórias:
 - URL como estado recuperável para aba, documento selecionado, página e filtro;
 - retorno pelo navegador sem perder seleção, rolagem ou contexto.
 
+#### Estado de execução local em 19 de agosto de 2026 — realinhamento estrutural
+
+Primeira rodada de realinhamento do `frontend` ao padrão desta seção,
+inspecionado diretamente em `new_sali/frontend`. Três frentes:
+
+**Estrutura de pastas.** `lib/src/modules/processos` ganhou a distinção
+`pages/` versus `components/`: o antigo `ProcessoDetalheComponent` virou
+`ProcessoDetalhePage` em `pages/processo_detalhe/`, container que só carrega
+o cabeçalho (o processo base) e delega cada seção a um componente próprio em
+`components/`. Documentos e andamentos mantiveram o carregamento sob demanda
+que já tinham; as oito seções novas (abaixo) carregam ao receber o processo,
+por serem projeções pequenas. `ProcessoDetalheService` ganhou um método por
+seção nova, todos reaproveitando o `_buscarLista`/`_buscarObjeto` já
+existente. `shared/` **não** foi criado ainda — nenhum componente, diretiva
+ou serviço deste módulo é reutilizado por outro módulo por enquanto, e a
+seção 28.4 já registra que `shared/` só nasce quando isso passar a ser
+verdade.
+
+**SCSS.** `web/style.scss` passou a ser a entrada única, compilada pelo
+`sass_builder` (adicionado como dev dependency) para `web/style.css`,
+referenciado pelo `index.html` — confirmado com `styleUrls: [...css]`
+apontando para `.scss` de origem, exatamente como `new_sali/frontend` faz
+(`sass_builder` compila para `.css` dentro do grafo de build; a inspeção do
+`new_sali` mostrou que **não** existe `.css` fisicamente ao lado do `.scss`
+no repositório, só como artefato do build). Os `.css` que já existiam nos
+componentes foram renomeados para `.scss` sem mudar `styleUrls`. O cartão
+visual repetido pelas dez seções da tela do processo (`.secao-detalhe`,
+tabela de rolagem, textos de carregando/vazio/erro) foi centralizado no
+`style.scss` global em vez de duplicado em cada `.scss` de componente — a
+mesma razão que a introdução desta seção já dava para um único `style.scss`.
+
+**Novas seções de dados ligadas ao backend**, todas como componente próprio
+com loading/erro/vazio no padrão de `AtividadesEmAbertoComponent`:
+unidades abertas (com destaque visual de que o estado aberto/concluído é por
+unidade, não do processo — `ProcessoUnidadeAberta` é lista, não booleano),
+relacionados, participantes, marcadores, acompanhamentos, controles de prazo
+e anotações (as duas últimas dependem de `idUnidade`, agora propagado de
+`AppComponent` até a página) e retornos programados. Ficou de fora nesta
+rodada o conteúdo de documento
+(`GET /documentos/:idDocumento/conteudo`) — o método já existe em
+`ProcessoDetalheService`, mas falta decidir a estratégia seria de exibição do
+HTML interno sem risco de XSS, e falta integrar a seleção com a árvore de
+documentos. `ngrouter` também não entrou nesta rodada: a navegação continua
+por `*ngIf`/booleano em `AppComponent`, sem URL como estado recuperável, que
+a seção acima exige — mudança maior, deixada como próximo passo para não
+introduzir router pela metade.
+
+Validado com `dart analyze` (sem apontamentos), `dart test` (13 testes,
+todos verdes) e `dart run build_runner build --delete-conflicting-outputs`
+(sucedido, `web/style.css` e o `.template.dart` de `ProcessoDetalhePage`
+confirmados no `.dart_tool/build/generated`).
+
 ### 28.5 API interna e API de compatibilidade
 
 Separar dois contratos:
@@ -2529,11 +2581,13 @@ Estado da API que sustenta esta composição:
 | Controle de Prazos | `GET /api/v1/processos/:id/controles-prazo?idUnidade=` | pronta, filtrada por unidade |
 | Retorno Programado | `GET /api/v1/processos/:id/retornos-programados` | pronta, com `cumprido` calculado |
 | `ProcessoConteudoComponent` | `GET /api/v1/processos/:id/documentos/:idDocumento/conteudo` | pronta; ponteiro de arquivo para externo, sem o byte |
+| Blocos (Assinatura, Reunião, Interno) | `GET /api/v1/processos/:id/blocos` | pronta, blocos que contêm o protocolo |
+| Base de Conhecimento | `GET /api/v1/processos/:id/bases-conhecimento` | pronta, associada ao tipo do processo |
 | `ProcessoAcoesComponent` | comandos por perfil e estado | pendente, depende de autorização SIP |
 
-Faltam ainda, para a tela ficar equivalente em leitura: processos anexados,
-Ponto de Controle (sem linha real nas fontes locais para comprovar o domínio),
-Blocos (Assinatura, Reunião, Interno) e Base de Conhecimento.
+Faltam ainda, para a tela ficar equivalente em leitura: processos anexados e
+Ponto de Controle (sem linha real nas fontes locais para comprovar o
+domínio).
 
 ### 30.3 Editor
 
@@ -3308,6 +3362,57 @@ Achado de modelagem: `documento.sta_editor` é `NOT NULL` no banco, mas sua
 correlação com interno/externo (`'2'`/`'0'`) pode refletir apenas "documento
 externo não tem editor", não um domínio de tipos de editor — por isso
 `Documento.editor` é campo obrigatório mas sem enum.
+
+### Estado de execução local em 19 de agosto de 2026 — Blocos e Base de Conhecimento
+
+Quarta rodada: os dois últimos recursos que a §30.2 listava como pendentes,
+Blocos (Assinatura, Reunião, Interno) e Base de Conhecimento, agora têm
+leitura na tela do processo.
+
+**Blocos.** O manual do usuário descreve os três tipos e cinco rótulos de
+estado, mas nenhum deles tinha código de banco comprovado antes desta rodada.
+O cruzamento das 113 linhas de `bloco`, 83 de `rel_bloco_protocolo` e 204 de
+`rel_bloco_unidade` do dump histórico fechou os dois domínios com cobertura
+de 100% dos dados observados:
+
+- `bloco.sta_tipo`: `A` (95, Assinatura), `I` (16, Interno) e `R` (2,
+  Reunião) — confirmado não só pela inicial, mas pelo conteúdo: bloco `A` só
+  contém protocolo `G` (documento), blocos `I`/`R` só contêm protocolo `P`
+  (processo), sem exceção;
+- `bloco.sta_estado`: `A` (48, Gerado), `D` (64, Disponibilizado) e `C` (1,
+  Concluído). O quarto rótulo do manual, "Recebido", não é um código à
+  parte — é o mesmo `D` visto pela unidade destinatária, conforme o próprio
+  texto do manual. O quinto, "Retornado", **não foi declarado**: zero linhas
+  do dump gravam esse estado, e a única fonte de código literal
+  (`TramiteEmBlocoRN::$TE_RETORNADO = 'R'`) descreve uma tabela distinta do
+  módulo PEN (`md_pen_bloco`), não `public.bloco`.
+
+Seis entidades persistíveis novas no `core` (`Bloco`, `RelacaoBlocoProtocolo`,
+`RelacaoBlocoUnidade`, `GrupoBloco`, `BaseConhecimento`,
+`BaseConhecimentoTipoProcedimento`) seguem a mesma regra de
+`toInsertMap()`/`toUpdateMap()` — três delas com chave primária composta por
+duas colunas atribuídas pela aplicação, sem coluna de identidade própria. Uma
+projeção de leitura nova, `ProcessoBloco`, resolve unidade geradora e usuário
+via `join`; o Grupo do bloco ficou de fora dela porque vive em
+`rel_bloco_unidade.id_grupo_bloco` (atributo por unidade, não do bloco).
+
+**Base de Conhecimento.** Zero linhas em `base_conhecimento` e
+`rel_base_conhec_tipo_proced`, tanto na Base de Referência quanto no dump
+histórico — sem nenhum dado real, `sta_estado` e `sta_documento` ficaram sem
+enum, código bruto preservado, no mesmo padrão de `Anotacao.situacao`. A
+leitura estrutural não teve ambiguidade: a associação é ao **tipo de
+processo**, não ao processo, via `rel_base_conhec_tipo_proced`, e a projeção
+`ProcessoBaseConhecimento` parte de `procedimento` para resolver o tipo do
+processo consultado antes de juntar `base_conhecimento`.
+
+Rotas novas:
+
+- `GET /api/v1/processos/:id/blocos` — blocos que contêm este protocolo;
+  como `rel_bloco_protocolo.id_protocolo` é genérico, o filtro já cobre
+  processo e documento;
+- `GET /api/v1/processos/:id/bases-conhecimento` — bases associadas ao tipo
+  do processo, não ao processo em si, reproduzindo por que o SEI mostra o
+  ícone "B" para todo processo daquele tipo.
 
 #### O que a E2 ainda exige
 

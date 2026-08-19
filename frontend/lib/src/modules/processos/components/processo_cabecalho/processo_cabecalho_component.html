@@ -1,0 +1,31 @@
+<header class="cabecalho-banner">
+  <p class="identificador">Processo SEI</p>
+  <h2>{{ cabecalho?.protocoloFormatado }}</h2>
+</header>
+
+<section class="dados-processo" *ngIf="cabecalho != null">
+  <h3>{{ cabecalho?.tipoProcedimentoNome }}</h3>
+  <p class="descricao">{{ cabecalho?.descricao }}</p>
+  <dl>
+    <div>
+      <dt>Situação</dt>
+      <dd>{{ cabecalho?.estadoProtocolo }}</dd>
+    </div>
+    <div>
+      <dt>Gerado em</dt>
+      <dd>{{ cabecalho?.dataGeracao }}</dd>
+    </div>
+    <div>
+      <dt>Unidade geradora</dt>
+      <dd>{{ cabecalho?.unidadeGeradoraSigla }} — {{ cabecalho?.unidadeGeradoraDescricao }}</dd>
+    </div>
+    <div>
+      <dt>Usuário gerador</dt>
+      <dd>{{ cabecalho?.usuarioGeradorNome }}</dd>
+    </div>
+    <div>
+      <dt>Nível de acesso</dt>
+      <dd>{{ cabecalho?.nivelAcessoLocal }}</dd>
+    </div>
+  </dl>
+</section>

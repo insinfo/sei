@@ -221,6 +221,42 @@ class ProcessoDetalheController {
     }
   }
 
+  Future<void> blocos(
+    RequestContext request,
+    ResponseContext response,
+  ) async {
+    try {
+      final int idProcesso = _lerIdProcesso(request);
+      final ProcessoDetalheRepository repositorio =
+          request.make<ProcessoDetalheRepository>();
+      final List<ProcessoBloco> blocos =
+          await repositorio.listarBlocos(idProcesso);
+      await RespostaApiHttp.responderLista(response, blocos);
+    } on FormatException catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message);
+    } on ArgumentError catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message.toString());
+    }
+  }
+
+  Future<void> basesConhecimento(
+    RequestContext request,
+    ResponseContext response,
+  ) async {
+    try {
+      final int idProcesso = _lerIdProcesso(request);
+      final ProcessoDetalheRepository repositorio =
+          request.make<ProcessoDetalheRepository>();
+      final List<ProcessoBaseConhecimento> bases =
+          await repositorio.listarBasesConhecimento(idProcesso);
+      await RespostaApiHttp.responderLista(response, bases);
+    } on FormatException catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message);
+    } on ArgumentError catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message.toString());
+    }
+  }
+
   Future<void> conteudoDocumento(
     RequestContext request,
     ResponseContext response,

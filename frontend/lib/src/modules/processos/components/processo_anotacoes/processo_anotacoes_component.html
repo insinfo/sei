@@ -1,0 +1,36 @@
+<section class="secao-detalhe">
+  <header>
+    <div>
+      <h3>Anotações</h3>
+      <p>Anotações da unidade selecionada sobre este processo.</p>
+    </div>
+  </header>
+
+  <p class="vazio" *ngIf="exibirAguardandoUnidade">Selecione uma unidade no contexto de desenvolvimento para ver as anotações.</p>
+  <p class="carregando" *ngIf="carregando">Carregando anotações...</p>
+  <p class="erro-simples" *ngIf="mensagemErro.isNotEmpty" role="alert">{{ mensagemErro }}</p>
+  <p class="vazio" *ngIf="carregado && anotacoes.isEmpty && !carregando">Não há anotação registrada por esta unidade.</p>
+
+  <div class="tabela-rolagem" *ngIf="anotacoes.isNotEmpty">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Anotação</th>
+          <th scope="col">Prioridade</th>
+          <th scope="col">Situação</th>
+          <th scope="col">Registrada em</th>
+          <th scope="col">Por</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of anotacoes">
+          <td>{{ item.descricao ?? '—' }}</td>
+          <td>{{ item.prioridade ? 'Sim' : 'Não' }}</td>
+          <td>{{ item.situacao }}</td>
+          <td>{{ item.dataAnotacao }}</td>
+          <td>{{ item.usuarioNome }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

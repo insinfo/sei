@@ -1,0 +1,35 @@
+<section class="secao-detalhe">
+  <header>
+    <div>
+      <h3>Acompanhamento especial</h3>
+      <p>Unidades que acompanham este processo, sem precisar tê-lo aberto.</p>
+    </div>
+  </header>
+
+  <p class="carregando" *ngIf="carregando">Carregando acompanhamentos...</p>
+  <p class="erro-simples" *ngIf="mensagemErro.isNotEmpty" role="alert">{{ mensagemErro }}</p>
+  <p class="vazio" *ngIf="carregado && acompanhamentos.isEmpty && !carregando">Não há acompanhamento especial registrado para este processo.</p>
+
+  <div class="tabela-rolagem" *ngIf="acompanhamentos.isNotEmpty">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Unidade</th>
+          <th scope="col">Grupo</th>
+          <th scope="col">Observação</th>
+          <th scope="col">Desde</th>
+          <th scope="col">Por</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of acompanhamentos">
+          <td>{{ item.unidadeSigla }}</td>
+          <td>{{ item.grupoNome ?? '—' }}</td>
+          <td>{{ item.observacao ?? '—' }}</td>
+          <td>{{ item.dataAlteracao }}</td>
+          <td>{{ item.usuarioNome }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

@@ -3,15 +3,15 @@ import 'dart:html' as html;
 
 import 'package:ngdart/angular.dart';
 import 'package:sei_core/sei_core.dart';
-import 'package:sei_frontend/src/modules/catalogos/components/catalogo_resumo_component.dart';
-import 'package:sei_frontend/src/modules/catalogos/components/lista_series_component.dart';
-import 'package:sei_frontend/src/modules/catalogos/components/lista_tipos_procedimento_component.dart';
+import 'package:sei_frontend/src/modules/catalogos/components/catalogo_resumo/catalogo_resumo_component.dart';
+import 'package:sei_frontend/src/modules/catalogos/components/lista_series/lista_series_component.dart';
+import 'package:sei_frontend/src/modules/catalogos/components/lista_tipos_procedimento/lista_tipos_procedimento_component.dart';
 import 'package:sei_frontend/src/modules/catalogos/services/catalogos_service.dart';
-import 'package:sei_frontend/src/modules/controle_processos/components/atividades_em_aberto_component.dart';
+import 'package:sei_frontend/src/modules/controle_processos/components/atividades_em_aberto/atividades_em_aberto_component.dart';
 import 'package:sei_frontend/src/modules/controle_processos/services/controle_processos_service.dart';
-import 'package:sei_frontend/src/modules/contexto_desenvolvimento/components/contexto_desenvolvimento_component.dart';
+import 'package:sei_frontend/src/modules/contexto_desenvolvimento/components/contexto_desenvolvimento/contexto_desenvolvimento_component.dart';
 import 'package:sei_frontend/src/modules/contexto_desenvolvimento/services/contexto_desenvolvimento_service.dart';
-import 'package:sei_frontend/src/modules/processos/components/processo_detalhe_component.dart';
+import 'package:sei_frontend/src/modules/processos/pages/processo_detalhe/processo_detalhe_page.dart';
 
 @Component(
   selector: 'sei-app',
@@ -24,7 +24,7 @@ import 'package:sei_frontend/src/modules/processos/components/processo_detalhe_c
     ListaSeriesComponent,
     AtividadesEmAbertoComponent,
     ContextoDesenvolvimentoComponent,
-    ProcessoDetalheComponent,
+    ProcessoDetalhePage,
   ],
   providers: <Provider>[
     ClassProvider(CatalogosService),

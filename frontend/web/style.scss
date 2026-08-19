@@ -1,0 +1,196 @@
+// Entrada única de estilos do frontend, seguindo o padrão comprovado em
+// `new_sali/frontend/web/style.scss` (ver "28.4 Frontend AngularDart" do
+// roteiro mestre): um único `style.scss` compilado pelo `sass_builder` para
+// `style.css` e referenciado pelo `web/index.html`. Regras verdadeiramente
+// globais (reset, tema, bibliotecas de terceiro) vivem aqui; estilo de um
+// componente específico continua no `.scss` ao lado do próprio componente,
+// com `styleUrls` apontando para o `.css` gerado.
+//
+// Quando o SEI 5 ganhar uma camada de tema própria compatível com o
+// `limitless_ui` (ver início da seção 28.4), o parcial correspondente entra
+// aqui como `@use 'sei_theme' as *;`, no mesmo padrão do `new_sali`.
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+    color: #1e293b;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+// Chrome compartilhado pelas seções de dados da tela do processo (cabeçalho,
+// documentos, andamentos, unidades abertas, relacionados, participantes,
+// marcadores, acompanhamentos, controles de prazo, anotações e retornos
+// programados). Cada seção é um componente próprio em
+// `lib/src/modules/processos/components/`, mas o "cartão" visual, a tabela
+// de rolagem e os textos de estado (carregando/vazio/erro) são idênticos
+// entre eles — centralizar aqui evita repetir a mesma regra em dez arquivos
+// `.scss`, exatamente o motivo do único `style.scss` descrito na seção
+// "28.4 Frontend AngularDart" do roteiro mestre.
+.secao-detalhe {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: #fff;
+    border: 1px solid #dbe2ea;
+    border-radius: 0.35rem;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 5%);
+}
+
+.secao-detalhe>header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.secao-detalhe h3 {
+    margin: 0;
+}
+
+.secao-detalhe header p {
+    margin: 0.2rem 0 0;
+    color: #475569;
+}
+
+.secao-detalhe button,
+.botao-mais,
+.botao-voltar {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #0e7490;
+    border-radius: 0.25rem;
+    color: #075985;
+    background: #fff;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+
+.botao-mais {
+    display: block;
+    margin: 1rem 0 0 auto;
+}
+
+button:focus-visible {
+    outline: 3px solid #38bdf8;
+    outline-offset: 2px;
+}
+
+button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.carregando,
+.vazio,
+.erro-simples {
+    margin: 1rem 0 0;
+    color: #475569;
+}
+
+.erro,
+.erro-simples {
+    color: #7f1d1d;
+}
+
+.erro {
+    padding: 1rem;
+    margin: 1rem 0 0;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 0.25rem;
+}
+
+.erro h2,
+.erro h3,
+.erro p {
+    margin: 0 0 0.4rem;
+}
+
+.tabela-rolagem {
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
+.tabela-rolagem table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabela-rolagem th,
+.tabela-rolagem td {
+    padding: 0.7rem;
+    border-bottom: 1px solid #eef2f7;
+    text-align: left;
+    vertical-align: top;
+}
+
+.tabela-rolagem th {
+    color: #475569;
+    background: #f8fafc;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+@media (max-width: 40rem) {
+    .secao-detalhe>header {
+        flex-direction: column;
+    }
+}
+
+// Cartão de listagem de catálogo, compartilhado por
+// `lista_series_component` e `lista_tipos_procedimento_component`
+// (`lib/src/modules/catalogos/components/`). Como as duas peças usam o
+// mesmo `.lista-catalogo`, o estilo mora aqui em vez de duplicado num
+// `.scss` sem dono — a pasta de cada componente guarda só o que é
+// exclusivo dela. `.tabela-rolagem` já está definido acima e é reaproveitado
+// sem alteração.
+.lista-catalogo {
+    background: #fff;
+    border: 1px solid #dbe2ea;
+    border-radius: 0.35rem;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 5%);
+}
+
+.lista-cabecalho {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid #dbe2ea;
+}
+
+.lista-cabecalho h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1rem;
+}
+
+.lista-cabecalho span {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.situacao {
+    display: inline-block;
+    padding: 0.15rem 0.45rem;
+    color: #166534;
+    background: #dcfce7;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.situacao.inativa {
+    color: #991b1b;
+    background: #fee2e2;
+}

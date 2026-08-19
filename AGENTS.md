@@ -191,6 +191,15 @@ final rows = await query.get();
 - `@Input()` deve receber dados prontos ou view models; evite passar mapas crus para templates.
 - `@Output()` deve emitir eventos de intencao da UI, nao executar regra de negocio dentro do filho quando a decisao pertence ao pai.
 
+### Estrutura de pastas: uma pasta por componente, uma pasta por página
+
+- `sei/frontend` segue a estrutura de pastas e o padrão de SCSS já comprovados em `C:\MyDartProjects\new_sali\frontend`. Não invente organização própria; ao ter dúvida, inspecione o projeto de referência diretamente.
+- Dentro de `lib/src/modules/<modulo>/`: `components/` para peça reutilizável, `pages/` para container de rota. `models/` e `services/` de módulo são exceção, só para estado de tela que não cruza pacote — DTO compartilhado com `backend`/`core` vai em `core/lib/src/models`.
+- **Cada componente e cada página moram na própria subpasta — nunca soltos direto em `components/` ou `pages/`.** Confirmado em `new_sali/frontend/lib/src/modules/protocolo/components/processo_header/` (contém `processo_header_component.dart` + `.html` + `.scss`, os três juntos na subpasta) e em `.../pages/visualiza_processo/`, que também aninha `components/<subseção>/` própria para as seções da página, por exemplo `pages/visualiza_processo/components/interessados/interessados_section_component.dart`.
+- **Nome da pasta = prefixo do arquivo.** Uma pasta de página `<nome>/` contém `<nome>_page.dart` + `.html` + `.scss` (ver `pages/home/home_page.*`, `pages/main_page/main_page.*`, `pages/visualiza_cgm/visualiza_cgm_page.*`). Uma pasta de componente `<nome>/` contém `<nome>_component.dart` + `.html` + `.scss`. Arquivo auxiliar que só serve àquela página/componente (helper de formulário, serviço local) fica dentro da mesma pasta, sem o sufixo `_page`/`_component` — ver `pages/visualiza_cgm/cgm_form_select_options.dart`.
+- **Nunca** crie `components/<nome>_component.dart` (ou `pages/<nome>_page.dart`) direto na raiz de `components/`/`pages/`, com os irmãos `.html`/`.scss` soltos ao lado — isso já aconteceu por engano nesta base (módulos `catalogos`, `contexto_desenvolvimento`, `controle_processos`) e deve ser corrigido para a subpasta própria sempre que for tocado.
+- Estilo: entrada única `web/style.scss`, com `@use '<parcial>' as *;` por tema (ver `new_sali/frontend/web/style.scss`), não uma folha CSS por componente solta na raiz do módulo.
+
 ### Composição de páginas grandes
 
 Página de rota deve ser container, não dona de toda regra visual. Para telas grandes:

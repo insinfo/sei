@@ -752,6 +752,112 @@ class ProcessoDetalheRepository {
     return row == null ? null : ProcessoDocumentoConteudo.fromMap(row);
   }
 
+  /// Lista os blocos que contêm este protocolo, processo ou documento.
+  ///
+  /// `rel_bloco_protocolo.id_protocolo` é genérico — vale para processo e
+  /// para documento, já que os dois são `protocolo` — então filtrar por
+  /// [idProcesso] já cobre o caso comum de blocos do processo.
+  Future<List<ProcessoBloco>> listarBlocos(int idProcesso) async {
+    final rows = await _connection
+        .table(ProcessoBloco.blocoFqtn)
+        .join(
+          ProcessoBloco.relacaoFqtn,
+          ProcessoBloco.relacaoIdBlocoFqCol,
+          '=',
+          ProcessoBloco.blocoIdFqCol,
+        )
+        .join(
+          ProcessoBloco.unidadeFqtn,
+          ProcessoBloco.unidadeIdFqCol,
+          '=',
+          ProcessoBloco.blocoIdUnidadeFqCol,
+        )
+        .join(
+          ProcessoBloco.usuarioFqtn,
+          ProcessoBloco.usuarioIdFqCol,
+          '=',
+          ProcessoBloco.blocoIdUsuarioFqCol,
+        )
+        .selectRaw('''
+          ${ProcessoBloco.blocoIdFqCol} AS ${ProcessoBloco.idBlocoCol},
+          ${ProcessoBloco.blocoTipoFqCol} AS ${ProcessoBloco.tipoCol},
+          ${ProcessoBloco.blocoEstadoFqCol} AS ${ProcessoBloco.estadoCol},
+          ${ProcessoBloco.blocoDescricaoFqCol} AS ${ProcessoBloco.descricaoCol},
+          ${ProcessoBloco.blocoIdUnidadeFqCol} AS ${ProcessoBloco.idUnidadeCol},
+          ${ProcessoBloco.unidadeSiglaFqCol} AS ${ProcessoBloco.unidadeSiglaCol},
+          ${ProcessoBloco.blocoIdUsuarioFqCol} AS ${ProcessoBloco.idUsuarioCol},
+          ${ProcessoBloco.usuarioNomeFqCol} AS ${ProcessoBloco.usuarioNomeCol},
+          ${ProcessoBloco.relacaoSequenciaFqCol} AS ${ProcessoBloco.sequenciaCol},
+          ${ProcessoBloco.relacaoAnotacaoFqCol} AS ${ProcessoBloco.anotacaoCol}
+        ''')
+        .where(ProcessoBloco.relacaoIdProtocoloFqCol, '=', idProcesso)
+        .orderBy(ProcessoBloco.relacaoSequenciaFqCol, 'asc')
+        .orderBy(ProcessoBloco.blocoIdFqCol, 'asc')
+        .get();
+
+    return rows
+        .map((Map<String, dynamic> row) => ProcessoBloco.fromMap(row))
+        .toList(growable: false);
+  }
+
+  /// Lista as bases de conhecimento associadas ao **tipo** deste processo.
+  ///
+  /// A Base de Conhecimento é vinculada ao tipo de processo, não ao processo
+  /// em si — é assim que o SEI decide quando mostrar o ícone "B" ao lado do
+  /// processo. A consulta parte de `procedimento` para descobrir
+  /// `id_tipo_procedimento` do processo consultado.
+  Future<List<ProcessoBaseConhecimento>> listarBasesConhecimento(
+    int idProcesso,
+  ) async {
+    final rows = await _connection
+        .table(ProcessoBaseConhecimento.procedimentoFqtn)
+        .join(
+          ProcessoBaseConhecimento.relacaoFqtn,
+          ProcessoBaseConhecimento.relacaoIdTipoProcedimentoFqCol,
+          '=',
+          ProcessoBaseConhecimento.procedimentoIdTipoFqCol,
+        )
+        .join(
+          ProcessoBaseConhecimento.baseConhecimentoFqtn,
+          ProcessoBaseConhecimento.baseConhecimentoIdFqCol,
+          '=',
+          ProcessoBaseConhecimento.relacaoIdBaseConhecimentoFqCol,
+        )
+        .join(
+          ProcessoBaseConhecimento.unidadeFqtn,
+          ProcessoBaseConhecimento.unidadeIdFqCol,
+          '=',
+          ProcessoBaseConhecimento.baseConhecimentoIdUnidadeFqCol,
+        )
+        .join(
+          ProcessoBaseConhecimento.usuarioFqtn,
+          ProcessoBaseConhecimento.usuarioIdFqCol,
+          '=',
+          ProcessoBaseConhecimento.baseConhecimentoIdUsuarioGeradorFqCol,
+        )
+        .selectRaw('''
+          ${ProcessoBaseConhecimento.baseConhecimentoIdFqCol} AS ${ProcessoBaseConhecimento.idBaseConhecimentoCol},
+          ${ProcessoBaseConhecimento.baseConhecimentoDescricaoFqCol} AS ${ProcessoBaseConhecimento.descricaoCol},
+          ${ProcessoBaseConhecimento.baseConhecimentoEstadoFqCol} AS ${ProcessoBaseConhecimento.estadoCol},
+          ${ProcessoBaseConhecimento.baseConhecimentoDocumentoFqCol} AS ${ProcessoBaseConhecimento.documentoCol},
+          ${ProcessoBaseConhecimento.baseConhecimentoDataGeracaoFqCol} AS ${ProcessoBaseConhecimento.dataGeracaoCol},
+          ${ProcessoBaseConhecimento.baseConhecimentoDataLiberacaoFqCol} AS ${ProcessoBaseConhecimento.dataLiberacaoCol},
+          ${ProcessoBaseConhecimento.baseConhecimentoIdUnidadeFqCol} AS ${ProcessoBaseConhecimento.idUnidadeCol},
+          ${ProcessoBaseConhecimento.unidadeSiglaFqCol} AS ${ProcessoBaseConhecimento.unidadeSiglaCol},
+          ${ProcessoBaseConhecimento.baseConhecimentoIdUsuarioGeradorFqCol} AS ${ProcessoBaseConhecimento.idUsuarioGeradorCol},
+          ${ProcessoBaseConhecimento.usuarioNomeFqCol} AS ${ProcessoBaseConhecimento.usuarioGeradorNomeCol}
+        ''')
+        .where(ProcessoBaseConhecimento.procedimentoIdFqCol, '=', idProcesso)
+        .orderBy(ProcessoBaseConhecimento.baseConhecimentoDescricaoFqCol, 'asc')
+        .get();
+
+    return rows
+        .map(
+          (Map<String, dynamic> row) => ProcessoBaseConhecimento.fromMap(row),
+        )
+        .toList(growable: false);
+  }
+
   Future<Map<int, _AtribuicaoAtividade>> _atribuicaoPorAtividade(
     List<Map<String, dynamic>> unidades,
   ) async {

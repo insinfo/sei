@@ -67,6 +67,17 @@ void registrarRotasProcessos(
     middleware: middlewares,
   );
   app.get(
+    '/api/v1/processos/:${ProcessoDetalheController.idProcessoParam}/blocos',
+    processoDetalheController.blocos,
+    middleware: middlewares,
+  );
+  app.get(
+    '/api/v1/processos/:${ProcessoDetalheController.idProcessoParam}'
+    '/bases-conhecimento',
+    processoDetalheController.basesConhecimento,
+    middleware: middlewares,
+  );
+  app.get(
     '/api/v1/processos/:${ProcessoDetalheController.idProcessoParam}'
     '/documentos/:${ProcessoDetalheController.idDocumentoParam}/conteudo',
     processoDetalheController.conteudoDocumento,

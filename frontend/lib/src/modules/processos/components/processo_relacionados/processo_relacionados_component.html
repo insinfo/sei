@@ -1,0 +1,39 @@
+<section class="secao-detalhe">
+  <header>
+    <div>
+      <h3>Processos relacionados</h3>
+      <p>Processos vinculados por afinidade temática, sem hierarquia entre si.</p>
+    </div>
+  </header>
+
+  <p class="carregando" *ngIf="carregando">Carregando processos relacionados...</p>
+  <p class="erro-simples" *ngIf="mensagemErro.isNotEmpty" role="alert">{{ mensagemErro }}</p>
+  <p class="vazio" *ngIf="carregado && relacionados.isEmpty && !carregando">Não há processos relacionados a este.</p>
+
+  <div class="tabela-rolagem" *ngIf="relacionados.isNotEmpty">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Processo</th>
+          <th scope="col">Tipo</th>
+          <th scope="col">Descrição</th>
+          <th scope="col">Situação</th>
+          <th scope="col">Vínculo criado em</th>
+          <th scope="col">Unidade do vínculo</th>
+          <th scope="col">Sentido</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of relacionados">
+          <td>{{ item.protocoloFormatado }}</td>
+          <td>{{ item.tipoProcedimentoNome }}</td>
+          <td>{{ item.descricao ?? '—' }}</td>
+          <td>{{ item.estadoProtocolo }}</td>
+          <td>{{ item.dataAssociacao }}</td>
+          <td>{{ item.unidadeAssociacaoSigla }}</td>
+          <td>{{ item.sentido.valor }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

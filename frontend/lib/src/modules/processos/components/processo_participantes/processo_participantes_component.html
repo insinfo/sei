@@ -1,0 +1,33 @@
+<section class="secao-detalhe">
+  <header>
+    <div>
+      <h3>Participantes</h3>
+      <p>Interessados, remetentes e destinatários vinculados ao processo.</p>
+    </div>
+  </header>
+
+  <p class="carregando" *ngIf="carregando">Carregando participantes...</p>
+  <p class="erro-simples" *ngIf="mensagemErro.isNotEmpty" role="alert">{{ mensagemErro }}</p>
+  <p class="vazio" *ngIf="carregado && participantes.isEmpty && !carregando">Não há participantes cadastrados neste processo.</p>
+
+  <div class="tabela-rolagem" *ngIf="participantes.isNotEmpty">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Nome</th>
+          <th scope="col">Sigla</th>
+          <th scope="col">E-mail</th>
+          <th scope="col">Papel</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of participantes">
+          <td>{{ item.contatoNome }}</td>
+          <td>{{ item.contatoSigla ?? '—' }}</td>
+          <td>{{ item.contatoEmail ?? '—' }}</td>
+          <td>{{ item.participacao?.name ?? item.codigoParticipacao }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
