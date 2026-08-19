@@ -4,10 +4,21 @@
       <p class="marca">Sistema Eletrônico de Informações</p>
       <h1>Catálogos de referência</h1>
     </div>
-    <button type="button" class="botao-secundario" (click)="atualizarAbaAtual()" [disabled]="carregando || carregandoAtividades || carregandoProcessosGerados || carregandoContexto">
-      {{ carregando || carregandoAtividades || carregandoProcessosGerados || carregandoContexto ? 'Atualizando...' : 'Atualizar' }}
-    </button>
+    <div class="acoes-cabecalho">
+      <button type="button" class="botao-secundario" (click)="atualizarAbaAtual()" [disabled]="carregando || carregandoAtividades || carregandoProcessosGerados || carregandoContexto">
+        {{ carregando || carregandoAtividades || carregandoProcessosGerados || carregandoContexto ? 'Atualizando...' : 'Atualizar' }}
+      </button>
+      <span class="usuario-logado" *ngIf="autenticado">{{ nomeUsuarioLogado }}</span>
+      <button type="button" class="botao-secundario" *ngIf="autenticado" (click)="sair()">Sair</button>
+      <button type="button" class="botao-secundario" *ngIf="!autenticado" (click)="entrar()">Entrar</button>
+    </div>
   </header>
+
+  <nav class="nav-administracao" aria-label="Administração">
+    <button type="button" (click)="navegarParaUsuarios()">Usuários</button>
+    <button type="button" (click)="navegarParaUnidades()">Unidades</button>
+    <button type="button" (click)="navegarParaOrgaos()">Órgãos</button>
+  </nav>
 
   <main>
     <p class="carregando" *ngIf="carregando">Carregando dados restaurados do SEI...</p>

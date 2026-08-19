@@ -37,6 +37,39 @@ h1 {
   font-size: 1.5rem;
 }
 
+.acoes-cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.usuario-logado {
+  color: #dbeafe;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.nav-administracao {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.nav-administracao button {
+  padding: 0.5rem 0.8rem;
+  color: #075985;
+  background: #fff;
+  border: 1px solid #7dd3fc;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.nav-administracao button:hover {
+  background: #e0f2fe;
+}
+
 .botao-secundario,
 .botao-erro,
 .abas button {

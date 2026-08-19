@@ -1,0 +1,19 @@
+<div class="pagina-callback">
+  <div class="cartao-callback">
+    <div class="logo-sei">
+      <span class="logo-marca">sei!</span>
+      <p class="logo-legenda">Sistema Eletrônico de Informações</p>
+    </div>
+
+    <ng-container *ngIf="processando">
+      <p class="callback-mensagem">Concluindo o login...</p>
+    </ng-container>
+
+    <ng-container *ngIf="!processando && erro != null">
+      <p class="callback-erro" role="alert">{{ erro }}</p>
+      <button type="button" class="botao-tentar-novamente" (click)="tentarNovamente()">
+        Tentar novamente
+      </button>
+    </ng-container>
+  </div>
+</div>

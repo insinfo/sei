@@ -1,0 +1,8 @@
+// O layout de filtro/tabela/paginação/detalhe desta página é compartilhado
+// com `UsuariosPage` e `OrgaosPage` e mora em `web/style.scss`
+// (`.pagina-administracao`, `.filtros`, `.paginacao`, `.detalhe-campos` e
+// afins) — ver o comentário lá para o racional. Este arquivo só declara o
+// `:host`, sem nada exclusivo desta tela até agora.
+:host {
+  display: block;
+}

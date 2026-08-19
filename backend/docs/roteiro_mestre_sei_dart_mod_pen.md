@@ -3640,6 +3640,388 @@ impossibilidade técnica. `backend/docs/evidencias_processo_detalhe.md` e o
 Dartdoc de `AutorizacaoUsuario`/`SipReferenciaRepository` foram corrigidos
 junto com esta seção.
 
+### Estado de execução local em 19 de agosto de 2026 — autenticação real e cadastro de usuário, unidade e órgão
+
+Quinta rodada: a pendência registrada nas duas seções anteriores — login real
+ficava fora de escopo "por decisão, não por impossibilidade técnica" — foi
+resolvida por pedido explícito do usuário. Esta rodada implementa login local
+(usuário e senha, bcrypt) e o cadastro de usuário, unidade e órgão contra
+`sei_5_0_0`, com escrita real protegida por `EscopoRepositorioTeste
+.emTransacaoRevertida()` nos testes, no mesmo padrão já usado pelas fixtures
+de processo.
+
+**Ausência de sequência em `usuario`, `orgao`, `unidade` e `contato`,
+confirmada.** `SELECT column_name, column_default FROM
+information_schema.columns WHERE table_name IN ('usuario','orgao','unidade',
+'contato') AND column_default IS NOT NULL` não retorna nenhuma linha: as
+quatro tabelas não têm `DEFAULT`/sequência na chave primária. A estratégia
+adotada é gerar o próximo identificador com `SELECT COALESCE(MAX(id_x), 0) +
+1 FROM tabela` dentro da mesma transação do insert (`ContatoRepository
+.proximoId`, `UsuarioRepository.proximoId`, `UnidadeRepository.proximoId`,
+`OrgaoRepository.proximoId`). **Isto é uma limitação de concorrência
+conhecida e aceita nesta rodada**: não há `SELECT ... FOR UPDATE` nem
+`advisory lock` sobre o cálculo do próximo id, então duas escritas
+concorrentes na mesma tabela podem calcular o mesmo próximo id e uma delas
+falhar por violação da chave primária. Corrigir isso com lock explícito (ou
+migrar para sequência, o que alteraria o schema e quebraria a
+comparabilidade com instalações reais do SEI) é próximo passo, não feito
+aqui.
+
+**Regra de `contato.id_contato_associado`, descoberta por cruzamento dos
+dados locais.** A tabela `contato` documenta o próprio domínio de
+`id_tipo_contato` em `tipo_contato.nome`/`descricao` (mesmo padrão de
+autodocumentação já usado para `tipo_permissao` no SIP), com 6 linhas
+confirmadas: `1 Usuários`, `2 Sistemas`, `3 Usuários Externos`,
+`4 Temporário`, `5 Unidades`, `6 Órgãos` — dois deles (`1` e `5`) têm o nome
+gravado como "Usuários ABC"/"Unidades ABC" na Base de Referência porque o
+instalador do SEI nomeia essas duas categorias dinamicamente a partir da
+sigla do primeiro órgão cadastrado ("ABC" é a sigla do órgão de referência
+local). Cruzando `SELECT id_contato, id_contato_associado, id_tipo_contato
+FROM contato` com `orgao.id_contato`: toda linha de tipo `1`
+(usuário) ou `5` (unidade) tem `id_contato_associado` igual ao `id_contato`
+do órgão a que pertence; toda linha de tipo `2` (sistema) ou `6` (órgão) tem
+`id_contato_associado` igual ao próprio `id_contato` (autorreferência). O
+cadastro implementado segue essa regra: `UsuarioService`/`UnidadeService`
+buscam o `id_contato` do órgão antes de criar o contato do usuário/unidade;
+`OrgaoService` cria o contato do órgão com autorreferência. Declarado com
+confiança total em `core/lib/src/models/tipo_contato.dart`, sem lacuna.
+
+**`contato.sta_natureza`/`sin_endereco_associado` por categoria, também
+cruzados.** Cada categoria tem exatamente uma amostra real na Base de
+Referência, e todas convergem: usuário (`tipo 1`) é sempre `sta_natureza =
+'F'` (pessoa física) com `sin_endereco_associado = 'S'`; unidade (`tipo 5`)
+e órgão (`tipo 6`) são sempre `'J'` (pessoa jurídica) com
+`sin_endereco_associado = 'N'`. O cadastro replica esse padrão por
+categoria; `NaturezaContato` (`core/lib/src/models/natureza_contato.dart`)
+declara `F`/`J` com confiança porque é o código-padrão nacional de PF/PJ, não
+um código proprietário do SEI.
+
+**Lacuna: `usuario.sta_tipo` continua opaco, mas com uma correlação nova.**
+A Base de Referência só mostra `'0'` (o usuário de teste) e `'1'` (as 4
+contas de sistema). Por instrução explícita desta rodada, o valor foi
+cruzado contra o dump histórico (`backend/referencias/backup_sei_bd/sei.sql`,
+`INSERT INTO usuario` com 1071 linhas, parseado com um script Python ad-hoc
+em LATIN1): a distribuição real é `'0'` (1059 linhas), `'1'` (5, as mesmas
+contas de sistema), `'2'` (1) e `'3'` (6). Cruzando com a presença de
+`senha`: **toda linha `'0'`/`'1'` tem `senha` vazia; toda linha `'2'`/`'3'`
+tem `senha` preenchida** (hash bcrypt real, formato `$2a$12$...`), sem
+nenhuma exceção nas 1071 linhas. Isso confirma de novo, com uma amostra bem
+maior, que o login local por senha é real e usa bcrypt — mas não prova o
+significado de cada dígito individualmente (por que `'0'` e não `'1'` para a
+maioria dos usuários sem senha, ou `'2'` e não `'3'` para quem tem). Por
+isso `Usuario.staTipo` continua um `String` opaco, sem enum. Como todo
+usuário criado por este cadastro sempre recebe senha local, ele usa
+`Usuario.staTipoComSenhaLocal = '2'` como padrão — nunca `'0'`/`'1'`, que na
+amostra completa jamais aparecem com senha. Esta lacuna também foi
+adicionada a `backend/docs/evidencias_processo_detalhe.md`.
+
+**Lacuna: `orgao.sta_corretor_ortografico`.** Só um valor (`'B'`) existe na
+Base de Referência local (um único órgão), insuficiente para provar um
+domínio fechado. Preservado cru (`Orgao.staCorretorOrtografico`), usado como
+padrão de criação (`Orgao.staCorretorOrtograficoPadrao`), sem virar enum.
+
+**`orgao.id_unidade` (unidade raiz) é nulo até ser vinculada.** A coluna é
+opcional no schema e o único órgão real local tem `id_unidade` nulo — isso
+resolve a ordem de criação órgão→unidade: o cadastro sempre cria o órgão
+primeiro com `id_unidade = null`, depois as unidades (cada uma referenciando
+o órgão por `id_orgao`). Vincular uma unidade como raiz do órgão é operação
+futura, fora do escopo desta rodada.
+
+**Autenticação.** `AutenticacaoService.login` resolve o órgão pela sigla
+(`OrgaoRepository.buscarPorSigla`), busca o usuário ativo naquele órgão
+(`AutenticacaoRepository.buscarUsuarioParaLogin`, que já exige
+`orgao.sin_ativo = 'S'` no `join`) e verifica a senha com
+`BCrypt.checkpw` (pacote `bcrypt`, pub.dev, compatível com hashes `$2a$`/
+`$2b$`/`$2y$` — os hashes reais do dump histórico usam `$2a$`, confirmando
+compatibilidade). Qualquer motivo de falha (usuário inexistente, órgão
+inexistente, senha errada, usuário ou órgão inativo) lança a mesma
+`AutenticacaoInvalidaException`, traduzida pelo controller em 401 com a
+mensagem genérica `"Usuário ou senha inválidos."` — nunca revela qual campo
+estava errado. O token é um JWT HS256 stateless (`AutenticacaoTokenService`,
+usando `jose: ^0.3.5+2`, já presente no `pubspec.yaml`), com claims
+`id_usuario`, `id_orgao`, `sigla`, `nome`, `iat` e `exp` (validade
+configurável por `jwt_duracao_horas`, padrão 8 horas). Não há sessão gravada
+em tabela nenhuma: nem no SEI, nem em `sip_5_0_0.login` (tabela de
+auditoria de login do SIP) — escrever ali mutaria a Base de Referência em
+uso real, fora dos testes, então essa auditoria fica pendente.
+
+**Endpoints novos**, todos servidos contra `sei_5_0_0` (middleware de
+conexão SEI):
+
+- `POST /api/v1/auth/login` — corpo `{usuario, senha, sigla_orgao}`, sem
+  autenticação prévia (é o próprio ponto de entrada). Sucesso 200:
+  `{token, id_usuario, id_orgao, sigla_usuario, nome_usuario}`; falha 401
+  genérico.
+- `GET /api/v1/auth/orgaos` — órgãos ativos para o seletor de login, sem
+  autenticação prévia. `{itens: [{id_orgao, sigla, descricao}]}`, projeção
+  estreita (`OrgaoLoginResumo`) que não expõe o cadastro completo do órgão.
+- `GET/POST/PUT /api/v1/usuarios[/:idUsuario]` e
+  `PUT /api/v1/usuarios/:idUsuario/senha` — cadastro de usuário, todas atrás
+  de `AuthMiddleware`. `senha` nunca é serializada de volta (`Usuario.toMap`
+  a omite por contrato); troca de senha é rota própria, separada da edição
+  cadastral, para que um `PUT` de nome/sigla/ativação nunca sobrescreva a
+  senha por acidente.
+- `GET/POST/PUT /api/v1/unidades[/:idUnidade]` — cadastro de unidade, atrás
+  de `AuthMiddleware`.
+- `GET/POST/PUT /api/v1/orgaos[/:idOrgao]` — cadastro de órgão, atrás de
+  `AuthMiddleware`.
+
+Filtros de listagem usam query params `id_orgao`, `sigla`, `nome` (só
+usuário), `sin_ativo` (`S`/`N`, mesmo domínio do banco) e `limite`/
+`deslocamento`, no mesmo formato de página (`itens`, `total`, `limite`,
+`deslocamento`) de `PaginaProcessosRecebidos`. Corpos de `POST`/`PUT` usam
+`ativo` como booleano JSON nativo (`true`/`false`), diferente do
+`sin_ativo` de query string — decisão deliberada: query string não carrega
+booleano nativo, corpo JSON carrega.
+
+**`AuthMiddleware`** (`backend/lib/src/shared/middlewares/auth_middleware
+.dart`) verifica `Authorization: Bearer <token>`, injeta `UsuarioAutenticado`
+no contêiner da requisição no mesmo estilo de `MiddlewareConexaoSei`/
+`MiddlewareConexaoSip`. Está pronto para proteger qualquer rota, mas **não
+foi aplicado retroativamente** às rotas de leitura já existentes (catálogos,
+controle de processos, processo, SIP referência) — isso é mudança maior,
+fora desta rodada. Aplicado só nas rotas novas de cadastro e nas de
+autenticação (login/órgãos sem exigir token, por serem o próprio ponto de
+entrada).
+
+**Fora de escopo desta rodada, documentado como pendência:**
+
+- Auditoria de login em `sip_5_0_0.login` (histórico de tentativas) — exige
+  escrever contra uma Base de Referência tratada como somente leitura fora
+  dos testes.
+- Aplicação retroativa de `AuthMiddleware` às rotas de leitura já
+  existentes.
+- Certificado digital ICP-Brasil e integração Gov.br — formas de
+  autenticação reais e documentadas do SEI (`usuario.dth_termo_uso`,
+  `sin_gov_br`, `id_usuario_federacao` já existem no schema e no model
+  `Usuario`, mas não há fluxo de emissão/validação de certificado nem client
+  OIDC do Gov.br implementado).
+- Lock explícito (ou sequência) para a geração de próximo id, documentado
+  acima como limitação de concorrência conhecida.
+- Vincular uma unidade como raiz de um órgão (`orgao.id_unidade`).
+
+Testado em `backend/test/integration/autenticacao_test.dart`,
+`usuario_cadastro_test.dart`, `unidade_cadastro_test.dart` e
+`orgao_cadastro_test.dart` (23 testes), mais testes de unidade dos models
+novos em `core/test/models/usuario_test.dart` e `cadastro_filtros_test.dart`
+(9 testes), todos com `EscopoRepositorioTeste.emTransacaoRevertida()` —
+nenhuma linha sintética permanece na Base de Referência
+(`SELECT count(*) FROM usuario/orgao/unidade/contato` confere com a
+contagem anterior à rodada: 5, 1, 3, 9).
+
+### Estado de execução local em 19 de agosto de 2026 — provider OpenID Connect
+
+Sexta rodada: implementado, por pedido explícito do usuário, um servidor
+OpenID Connect **provider** no próprio backend do SEI — não um cliente
+consumindo Google/gov.br, mas o backend agindo como Identity Provider (IdP)
+para outras aplicações, mesmo desenho do projeto de referência `new_sali`
+(`new_sali/backend/lib/src/modules/oidc/`).
+
+**Por que provider, e não só o JWT ad-hoc já existente.** O login local
+(`AutenticacaoService`, seção anterior) continua existindo e é reaproveitado
+sem alteração — ele é exatamente a verificação de credencial por trás do
+fluxo OIDC, do mesmo jeito que o `LoginController.handleLoginAction` do
+`new_sali` chama seu próprio `AuthRepository.authenticate` antes de emitir o
+código de autorização. O que muda é a camada por cima: o achado que motiva um
+provider em vez de continuar só com o JWT HS256 stateless é que **o SIP real
+já é descrito, na documentação já levantada neste roteiro, como o serviço de
+permissões compartilhado por múltiplos sistemas de uma instituição (SEI e
+potencialmente outros)** — exatamente o papel de um Identity Provider OIDC
+para múltiplos Relying Parties. Implementar o provider aqui torna essa
+analogia concreta: o frontend AngularDart do SEI (`sei-frontend`) passa a ser
+o primeiro client (Relying Party) registrado contra este provider, e um
+sistema futuro que precise reconhecer o mesmo usuário logado no SEI ganha um
+caminho padrão (`authorization_code` + PKCE) em vez de precisar entender o
+JWT proprietário do login local.
+
+**Três tabelas novas, e por que não são do schema real do SEI/SIP.**
+`oidc_cliente`, `oidc_codigo_autorizacao` e `oidc_token_renovacao` (migration
+`backend/scripts/migrations/0001_oidc.sql`) não existem em nenhuma versão
+oficial do SEI ou do SIP — são infraestrutura própria deste projeto, mesmo
+raciocínio já registrado para `contexto_desenvolvimento` antes de virar
+tabela própria. Moram no schema `public` da base `sei_5_0_0` (a mesma
+conexão do login local), em português, com `timestamp without time zone`
+(nunca `with time zone`) e chave primária **natural** — string opaca gerada
+pela aplicação (`OidcCliente.gerarIdCliente`, `OidcCodigoAutorizacao
+.gerarValorCodigo`, `OidcTokenRenovacao.gerarValorToken`), não uma sequência,
+porque cada linha já nasce com um identificador de negócio único; regra de
+"sempre sequence" do `AGENTS.md` é para PK inteira sequencial, não se aplica
+aqui. `oidc_codigo_autorizacao`/`oidc_token_renovacao` ganharam FK para
+`usuario(id_usuario)` (permitido: é constraint na tabela nova, não altera a
+tabela real). Modelos em `core/lib/src/models/oidc_cliente.dart`,
+`oidc_codigo_autorizacao.dart`, `oidc_token_renovacao.dart`, todos com
+`toInsertMap`/`toUpdateMap` e constantes de coluna, seguindo o padrão de
+`Serie`/`Usuario`.
+
+**Achado técnico: escrever `DateTime.now()` do Dart direto numa coluna
+`timestamp without time zone` e comparar depois quebra, por causa do
+round-trip do driver.** Descoberto ao investigar por que um código de
+autorização recém-emitido, com expiração 5 minutos no futuro, era tratado
+como já expirado. O driver (`eloquent` sobre `postgres`) grava os dígitos de
+um `DateTime` local literalmente (sem converter para UTC) e, na leitura,
+devolve um `DateTime` **marcado UTC com esses mesmos dígitos** — ou seja,
+gravar `DateTime.now()` (hora local, aqui UTC-3) e comparar depois com
+`DateTime.now()` de novo compara instantes reais defasados em 3 horas. A
+correção, aplicada nos três `toInsertMap`/`toUpdateMap` novos, é sempre
+gravar `.toUtc()`: isso alinha os dígitos gravados com os dígitos que serão
+relidos como UTC, e a comparação (`DateTime.now().isAfter(...)`) volta a
+funcionar mesmo comparando um `DateTime` local com um marcado UTC (a
+comparação do Dart usa o instante real, não a marcação). Vale para qualquer
+tabela nova futura que grave data/hora calculada em Dart (não via `now()`/
+`LOCALTIMESTAMP` do próprio Postgres) para uma coluna `timestamp without
+time zone` — documentado aqui porque não havia precedente no projeto até
+agora (as tabelas reais do SEI/SIP são só lidas, e o cadastro de usuário/
+unidade/órgão da rodada anterior não grava timestamp calculado em Dart).
+
+**RS256 de verdade, chave gerada localmente.** `backend/scripts
+/gera_chave_oidc.dart` (rode com `dart run scripts/gera_chave_oidc.dart` a
+partir de `backend/`) gera um par RSA 2048 em formato JWK e grava em
+`.certificates/sei_idp_private_key.json`/`sei_idp_public_key.json` — já
+gerado localmente nesta rodada, confirmado no `.gitignore` da raiz
+(`.certificates/`) e nunca commitado. `OidcService`
+(`backend/lib/src/modules/oidc/services/oidc_service.dart`) carrega o par na
+subida do processo (falha rápido e explícito se o script não rodou ainda) e
+expõe `discoveryDocument`, `jwks`, `criarIdToken`/`criarAccessToken`
+(`package:jose` + `package:crypto_keys`, adicionado ao `pubspec.yaml`).
+Claims deliberadamente enxutas: nenhuma informação de unidade/órgão nesta
+rodada — quando o escopo concedido inclui `profile`, `id_token` e
+`GET /oauth2/userinfo` incluem `name`/`preferred_username`, resolvidos por
+`UsuarioRepository.buscarPorId` (reaproveitado, já existia para o cadastro),
+nunca embutidos de forma estática no `access_token`. `access_token` carrega
+um `jti` aleatório por emissão (RFC 7519 §4.1.7) — sem ele, dois tokens
+emitidos no mesmo segundo para o mesmo usuário/cliente/escopo (ex.: o
+original e o de uma renovação) teriam claims idênticas e, por assinatura
+determinística, seriam a mesma string.
+
+**Endpoints novos**, todos servidos contra `sei_5_0_0`, nenhum atrás de
+`AuthMiddleware` (são o próprio ponto de entrada do fluxo, como as rotas de
+`POST /api/v1/auth/login`):
+
+- `GET /.well-known/openid-configuration` e `GET /oauth2/jwks` — descoberta
+  e chave pública.
+- `GET /oauth2/authorize` — valida `client_id`/`redirect_uri` contra
+  `OidcClienteRepository`, negocia os escopos concedidos (interseção entre o
+  pedido e `oidc_cliente.escopos_permitidos`, exigindo `openid`), guarda a
+  requisição pendente na sessão HTTP e redireciona para `/login`.
+- `GET /login` / `POST /login` (`OidcLoginController`) — página de login
+  HTML autocontida (sem engine de views, o projeto não tinha uma
+  configurada) e o processamento do formulário, que chama
+  `AutenticacaoService.login` e, em caso de sucesso, `OidcController
+  .emitirCodigoERedirecionar`.
+- `POST /oauth2/token` — troca `authorization_code` (com PKCE `S256`
+  obrigatório quando o `authorize` recebeu `code_challenge`) por
+  `access_token`/`id_token`/`refresh_token` (este último só quando o escopo
+  concedido inclui `offline_access`), ou renova um `refresh_token` existente
+  (`grant_type=refresh_token`, com rotação: o token usado é revogado mesmo
+  quando a emissão do próximo já está garantida). Código de autorização é de
+  uso único — revogado assim que localizado no banco, antes até da checagem
+  de PKCE, então uma tentativa com `code_verifier` errado também consome o
+  código.
+- `GET/POST /oauth2/userinfo` — exige `Authorization: Bearer`, devolve
+  claims do escopo concedido buscando o usuário na hora (dado fresco, não um
+  retrato estático do momento da emissão do token).
+- `GET/POST /oauth2/logout` — encerra a sessão local; só redireciona para
+  `post_logout_redirect_uri` quando ele vem acompanhado de um
+  `id_token_hint` válido cujo `aud` resolve a um `oidc_cliente` que tem
+  aquela URI cadastrada em `uris_redirecionamento_pos_logout` (proteção
+  contra open redirect); sem isso, cai no fallback `/login`.
+
+**Sessão do Angel3, sem middleware novo.** A guarda entre `/oauth2/authorize`
+e `/login` (`OidcController.chaveSessaoPendencia`) usa `request.session`, que
+o `HttpRequestContext` do Angel3 já expõe nativamente como o `HttpSession` do
+próprio `dart:io` (`rawRequest?.session`) quando a API roda sobre
+`AngelHttp`/`HttpServer` real — nenhuma configuração ou pacote adicional
+(`angel3_session` ou equivalente) foi necessário. Isso é diferente do
+`new_sali`, que tem uma camada própria de sessão (`CustomHttpRequestContext`/
+`simple_session.dart`) por causa de infraestrutura mais ampla (HTTP/2, métrica
+Prometheus) que este projeto não replica.
+
+**`client_id` gerado para o frontend do SEI.** Semeado por
+`backend/scripts/migrations/0002_oidc_seed_cliente_frontend.sql` (idempotente,
+`ON CONFLICT ... DO UPDATE`), aplicado localmente:
+
+```
+client_id: VtmSvvPTcSi11_bmtW8ncd-NmW-4LFAQ0sqNps6XlHw
+tipo_aplicacao: web_spa (SPA pública, sem segredo, usa PKCE)
+uris_redirecionamento: http://localhost:8080/callback, http://127.0.0.1:8080/callback
+uris_redirecionamento_pos_logout: http://localhost:8080/, http://127.0.0.1:8080/
+escopos_permitidos: openid, profile
+```
+
+Este é o `client_id` que o próximo agente (frontend, integração via
+`package:openid_client` ou fluxo PKCE manual com `http`) deve usar. A porta
+`8080` é a porta padrão do `webdev serve`, a mesma usada pelo `new_sali
+/frontend` — **não confirmada ainda contra um script de build/serve próprio
+deste projeto**, porque `sei/frontend` ainda não tem um (`frontend/README.md`
+só descreve `dart pub get` + `build_runner build`; não há `scripts/`
+nem `ui_test/` aqui, diferente do que uma seção mais antiga deste mesmo
+`AGENTS.md` sugere — herança do template `new_sali` ainda não limpa, fora do
+escopo desta rodada corrigir). Se o agente de frontend fixar outra porta ou
+outro caminho de callback, ajuste `uris_redirecionamento`/
+`uris_redirecionamento_pos_logout` com um novo script de migration (nunca
+edite a `0002` já aplicada; adicione uma `0003`).
+
+**Fora de escopo desta rodada, documentado como próximo passo — não
+esquecido:**
+
+- **Gov.br**: nenhum provedor externo configurado. O padrão genérico
+  `GET /auth/:provider/start` / `GET /auth/:provider/callback` do `new_sali`
+  foi deliberadamente deixado de fora — não implementado nem como rota vazia,
+  porque não há provedor nenhum para testar contra ele ainda.
+  `usuario.dth_termo_uso`/`sin_gov_br`/`id_usuario_federacao` já existem no
+  schema e no model `Usuario` (achado da rodada anterior), mas sem fluxo de
+  federação.
+- **Reset de senha por e-mail** (`password/forgot`/`password/reset` do
+  `new_sali`) — fora de escopo; login local continua exigindo que a senha já
+  esteja cadastrada.
+- **Claim de unidade/órgão no token** — mantido fora deliberadamente para o
+  token ficar enxuto nesta primeira versão; quando um client precisar dessa
+  informação, ela deve vir de `GET /oauth2/userinfo` com um escopo próprio
+  (`unidade`, por exemplo), não embutida sempre.
+- **Cliente `backend_confidencial`** — `OidcCliente.hashDoSegredo`/
+  `verificarSegredo` existem (SHA-256, com o mesmo aviso do `new_sali` de que
+  não é o algoritmo ideal para um segredo de baixa entropia — aqui o segredo
+  é gerado aleatoriamente, então SHA-256 é aceitável) mas nenhum cliente desse
+  tipo foi cadastrado; a rota de cadastro/gestão de clientes OIDC também não
+  existe (o único jeito de registrar um cliente hoje é migration/seed).
+- **Erro do `authorize` como redirect com `error=`/`error_description`
+  (RFC 6749 §4.1.2.1)** — implementado aqui como JSON 400 direto, mais simples
+  e suficiente para o cliente único cadastrado; o redirecionamento de erro
+  espec-compliant é próximo passo quando houver um client de verdade
+  consumindo esses erros.
+
+**Padrão de teste novo: harness próprio em vez de `angel3_test`.**
+`backend/test/support/oidc_test_harness.dart` invoca os controllers
+diretamente (`HttpRequestContext`/`HttpResponseContext` de produção,
+construídos via `angel3_mock_request`), sem passar pelo dispatch HTTP real de
+`AngelHttp`/`TestClient`. Motivo, comprovado experimentalmente
+(`Connection` obtida por uma segunda "requisição" com `db_poolsize=2` não
+enxerga o `INSERT` de uma transação ainda aberta na primeira): usar
+`angel3_test`'s `TestClient` faria cada chamada HTTP resolver sua própria
+conexão do pool, cega para os dados da fixture de `EscopoRepositorioTeste
+.emTransacaoRevertida`, e criar usuário/órgão reais e comitados só para o
+teste violaria a regra de nunca gravar dado sintético na Base de Referência.
+O harness injeta a mesma `Connection` de transação no contêiner de cada
+requisição simulada — o mesmo que `MiddlewareConexaoSei` faz em produção, só
+apontando sempre para a conexão do teste — então `authorize` → `login` →
+`token` continuam na mesma transação de ponta a ponta. Também documenta (e
+contorna) que `ResponseContext` só escreve em `.buffer` quando `useBuffer()`
+é chamado explicitamente — nenhum controller deste projeto chama, então o
+corpo da resposta é lido do `MockHttpResponse` (`rawResponse`), não do
+buffer.
+
+Testado em `backend/test/integration/oidc_provider_test.dart` (9 testes):
+discovery document, jwks, rejeição de `client_id`/`redirect_uri`
+desconhecidos, fluxo completo `authorize`→`login`→`token` com verificação de
+assinatura RS256 (`id_token`/`access_token`, claims `iss`/`sub`/`aud`/`exp`/
+`nonce`/`name`/`preferred_username`) contra a chave pública do `jwks`, PKCE
+rejeitando `code_verifier` errado, uso único do código de autorização,
+renovação de `refresh_token` com rotação (token antigo revogado, novo emitido,
+reuso do antigo rejeitado com 401), login com senha incorreta e logout com/
+sem `id_token_hint` válido. `dart test` do backend: 72/72 (era 63/63 antes
+desta rodada); `dart test` do core: 31/31, sem alteração de comportamento
+nos modelos existentes.
+
 ### Entrega E2 — Primeira linha na tela
 
 Resultado demonstrável: autenticar, escolher unidade e exibir um processo real

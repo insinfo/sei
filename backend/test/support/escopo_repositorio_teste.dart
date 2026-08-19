@@ -19,6 +19,12 @@ class EscopoRepositorioTeste {
   final Connection _connection;
   final Container _container;
 
+  /// Aplicação Angel usada por este escopo — exposta para testes que
+  /// precisam montar `RequestContext`/`ResponseContext` diretamente (ver
+  /// `test/support/oidc_test_harness.dart`), sem repetir
+  /// `criarAplicacao(...)`.
+  Angel get app => _app;
+
   static Future<EscopoRepositorioTeste> criarSei() async {
     final Angel app = criarAplicacao(SeiAppConfig.carregar());
     final SeiDatabaseService servicoConexao =

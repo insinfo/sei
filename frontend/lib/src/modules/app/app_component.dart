@@ -4,6 +4,7 @@ import 'package:sei_frontend/src/modules/catalogos/services/catalogos_service.da
 import 'package:sei_frontend/src/modules/contexto_desenvolvimento/services/contexto_desenvolvimento_service.dart';
 import 'package:sei_frontend/src/modules/controle_processos/services/controle_processos_service.dart';
 import 'package:sei_frontend/src/shared/routes/app_routes.dart';
+import 'package:sei_frontend/src/shared/services/auth_service.dart';
 import 'package:sei_frontend/src/shared/services/sessao_unidade_service.dart';
 
 /// Casco raiz da aplicação: só o `<router-outlet>` e os provedores
@@ -30,6 +31,7 @@ import 'package:sei_frontend/src/shared/services/sessao_unidade_service.dart';
     ClassProvider(ControleProcessosService),
     ClassProvider(ContextoDesenvolvimentoService),
     ClassProvider(SessaoUnidadeService),
+    ClassProvider(AuthService),
   ],
 )
 class AppComponent {

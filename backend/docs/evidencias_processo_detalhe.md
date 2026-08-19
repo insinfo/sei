@@ -451,3 +451,20 @@ acima — nenhuma delas é grande o suficiente para exigir análise adicional de
   tem nenhuma ocorrência `S` para confirmá-la.
 - **`base_conhecimento.sta_estado` e `sta_documento`.** Zero linhas na Base
   de Referência e no dump histórico; sem enum, código bruto preservado.
+- **`usuario.sta_tipo`.** A Base de Referência local só mostra `'0'` (o
+  usuário de teste) e `'1'` (as 4 contas de sistema SEI/SIP/INTRANET/
+  INTERNET). Cruzado contra o dump histórico
+  (`backend/referencias/backup_sei_bd/sei.sql`, `INSERT INTO usuario`, 1071
+  linhas, parseado com script Python ad-hoc em LATIN1): a distribuição real
+  é `'0'` (1059), `'1'` (5, as mesmas contas de sistema), `'2'` (1) e `'3'`
+  (6). Cruzando com a presença de `senha`: toda linha `'0'`/`'1'` tem
+  `senha` vazia; toda linha `'2'`/`'3'` tem `senha` preenchida (hash bcrypt
+  real, formato `$2a$12$...`), sem exceção nas 1071 linhas. Essa correlação
+  é forte e reforça que o login local por senha é real, mas não prova o
+  significado de cada dígito individualmente — por que `'0'` e não `'1'`
+  para a maioria dos usuários sem senha, ou `'2'` e não `'3'` para quem tem
+  senha. `Usuario.staTipo` (`core/lib/src/models/usuario.dart`) permanece um
+  `String` opaco, sem enum; usuários criados pelo cadastro implementado em
+  19 de agosto de 2026 usam `Usuario.staTipoComSenhaLocal = '2'` como
+  padrão, por ser um dos dois valores que na amostra completa sempre têm
+  senha preenchida — nunca `'0'`/`'1'`, que jamais aparecem com senha.

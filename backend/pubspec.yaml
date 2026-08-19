@@ -9,7 +9,8 @@ environment:
 dependencies:
   angel3_container: ^8.3.0
   angel3_framework: ^8.5.0
-  jose: ^0.3.5+2 
+  jose: ^0.3.5+2
+  crypto_keys: ^0.3.0+1
   mailer: ^6.5.0
   json_schema: ^5.2.0
   http: ^1.6.0
@@ -31,6 +32,8 @@ dependencies:
   belatuk_range_header: ^6.4.0
   crypto: ^3.0.7
   uuid: ^4.5.2
+  bcrypt: ^1.1.3
+  http_parser: any
  
   sei_core:
     path: ../core

@@ -139,8 +139,7 @@ final rows = await query.get();
 - `LOCALTIMESTAMP` também pode ser usado para deixar a intenção explícita, mas a regra obrigatória é o tipo da coluna permanecer sem fuso.
 - Migrations devem preservar dados existentes: prefira `ALTER TABLE`, `RENAME`, `ALTER COLUMN TYPE ... USING` e backfill validável. Não recrie tabela histórica com dados sem plano explícito de cópia e conferência.
 
-- Registre migrations numeradas na pasta da versão em desenvolvimento, atualmente `backend/scripts/6.3.0/`; não reutilize pastas de versões encerradas.
-- No mesmo commit, atualize `backend/scripts/ci/schema_sali.sql`, os seeds `seed_sali_ci*.sql` e os scripts de preparo relacionados. O CI recria o banco por esses artefatos, não pelas migrations numeradas.
+- **Este projeto ainda não tem pasta de migrations numeradas nem `schema_sali.sql`/`seed_sali_ci*.sql`** — essas referências também são herança do template `new_sali` (que está na versão 6.3.0) e não existem aqui (`backend/scripts/` hoje só tem `restaurar_sei_5_0_0_postgresql.ps1`). Tabela nova que o próprio projeto SEI cria (não faz parte do schema real do SEI/SIP restaurado) deve ganhar uma migration em `backend/scripts/migrations/`, numerada sequencialmente (ex. `0001_...sql`); crie a pasta se for a primeira. Nunca altere estruturalmente uma tabela que pertence ao schema real do SEI/SIP (as que aparecem em `\d` contra `sei_5_0_0`/`sip_5_0_0`) — isso quebraria a comparabilidade com instalações reais do SEI.
 
 ### Performance de consultas
 
@@ -161,9 +160,28 @@ final rows = await query.get();
 
 ### Autorização de rotas
 
-- A API REST é autorizada por `public.acao_rota` (`cod_acao`, `metodo_http`, `uri_pattern`), que mapeia **ação → rota**. Uma rota nova consumida por uma tela **não funciona (403)** enquanto não estiver vinculada à(s) ação(ões) da(s) tela(s) que a chamam.
-- Ao criar endpoint novo, **registre em `acao_rota`** via migration em `backend/scripts/6.3.0/`, para a ação correspondente à tela (o `a=<cod_acao>` da rota do frontend). Ex.: rota chamada pela tela Alterar Atributo (`alterar-atributo-protocolo?a=313`) → `INSERT ... VALUES (313, 'GET', '/protocolo/atributosprotocolo/uso/:codAtributo') ON CONFLICT DO NOTHING`.
-- Descubra as ações certas consultando o vínculo das rotas irmãs da mesma tela: `SELECT cod_acao, metodo_http, uri_pattern FROM public.acao_rota WHERE uri_pattern ILIKE '%<recurso>%'`. Use o padrão `:param` no `uri_pattern` (ex.: `/protocolo/processos/:codProcesso/:anoExercicio`).
+- **Este projeto não tem `acao_rota`.** Esse mecanismo é de outro projeto
+  (template `new_sali`) e nunca existiu no schema do SEI/SIP — não crie essa
+  tabela nem se refira a ela.
+- O modelo real de autorização do SEI é o do SIP, já investigado e
+  implementado: `permissao` (concede `perfil` a `usuario`×`unidade`×`sistema`
+  com janela `dta_inicio`/`dta_fim`) → `perfil` → `rel_perfil_recurso` → `recurso`
+  (`recurso.caminho` guarda o identificador funcional da tela/ação, herdado do
+  SEI em PHP, ex. `controlador.php?acao=sistema_cadastrar`). Ver
+  `SipReferenciaRepository.resolverAutorizacao` e `AutorizacaoUsuario` em
+  `core/lib/src/models/autorizacao_usuario.dart`, e o achado completo em
+  `backend/docs/evidencias_processo_detalhe.md` (seção "SIP — autorização por
+  recurso").
+- Autenticação é separada de autorização: login local valida
+  `sei_5_0_0.usuario.senha` (hash bcrypt); LDAP/AD é integração opcional por
+  órgão via `servidor_autenticacao`/`rel_orgao_autenticacao`. Nenhum dos dois
+  usa `acao_rota`.
+- Rota nova que precisa checar permissão deve consultar `recurso.caminho`
+  (ou o identificador equivalente já resolvido por
+  `resolverAutorizacao`) contra os recursos liberados do usuário/unidade —
+  nunca inventar coluna, tabela ou convenção de código de ação que não tenha
+  sido confirmada por `\d` direto no banco ou por cross-tab no dump
+  histórico.
 
 ## CGM
 

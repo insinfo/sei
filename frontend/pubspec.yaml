@@ -7,6 +7,7 @@ environment:
   sdk: ^3.6.0
 
 dependencies:
+  crypto: ^3.0.7
   http: ^1.6.0
   ngdart: 8.0.0-dev.4
   ngrouter: 4.0.0-dev.3

@@ -13,6 +13,7 @@ import 'package:sei_frontend/src/modules/contexto_desenvolvimento/services/conte
 import 'package:sei_frontend/src/modules/controle_processos/components/atividades_em_aberto/atividades_em_aberto_component.dart';
 import 'package:sei_frontend/src/modules/controle_processos/services/controle_processos_service.dart';
 import 'package:sei_frontend/src/shared/routes/route_paths.dart';
+import 'package:sei_frontend/src/shared/services/auth_service.dart';
 import 'package:sei_frontend/src/shared/services/sessao_unidade_service.dart';
 
 /// Tela raiz da aplicação: catálogos de referência e controle de processos.
@@ -42,6 +43,7 @@ class CatalogoPage implements OnInit {
     this._controleProcessosService,
     this._contextoDesenvolvimentoService,
     this._sessaoUnidade,
+    this._authService,
     this._router,
   );
 
@@ -49,7 +51,16 @@ class CatalogoPage implements OnInit {
   final ControleProcessosService _controleProcessosService;
   final ContextoDesenvolvimentoService _contextoDesenvolvimentoService;
   final SessaoUnidadeService _sessaoUnidade;
+  final AuthService _authService;
   final Router _router;
+
+  /// `true` quando há uma sessão autenticada em [AuthService], lido uma vez
+  /// em [ngOnInit] — campo estável para o template, e não uma chamada de
+  /// método a cada ciclo de checagem.
+  bool autenticado = false;
+
+  /// Nome do usuário autenticado, para exibição no cabeçalho.
+  String nomeUsuarioLogado = '';
 
   final String tituloAtividades = 'Processos recebidos';
   final String descricaoAtividades = 'Processos recebidos';
@@ -95,8 +106,49 @@ class CatalogoPage implements OnInit {
 
   @override
   void ngOnInit() {
+    autenticado = _authService.autenticado;
+    nomeUsuarioLogado = _authService.nomeUsuario ?? '';
     unawaited(recarregar());
     unawaited(carregarContextoDesenvolvimento());
+  }
+
+  /// Navega para a tela de login, usada depois de [sair] — mostrar a tela
+  /// (em vez de já redirecionar para o provider OIDC) deixa claro para o
+  /// usuário que a sessão foi encerrada antes de pedir um novo login.
+  void navegarParaLogin() {
+    unawaited(_router.navigate(RoutePaths.login.toUrl()));
+  }
+
+  /// Dispara direto o redirect OIDC (Authorization Code + PKCE) a partir do
+  /// botão "Entrar" desta página, sem passar pela tela de
+  /// [RoutePaths.login] — que aqui só repetiria o mesmo botão. A rota de
+  /// login continua existindo como ponto de entrada explícito (deep link,
+  /// ou o caminho usado por [sair] acima).
+  void entrar() {
+    _authService.iniciarLogin();
+  }
+
+  /// Navega para a administração de usuários.
+  void navegarParaUsuarios() {
+    unawaited(_router.navigate(RoutePaths.usuarios.toUrl()));
+  }
+
+  /// Navega para a administração de unidades.
+  void navegarParaUnidades() {
+    unawaited(_router.navigate(RoutePaths.unidades.toUrl()));
+  }
+
+  /// Navega para a administração de órgãos.
+  void navegarParaOrgaos() {
+    unawaited(_router.navigate(RoutePaths.orgaos.toUrl()));
+  }
+
+  /// Encerra a sessão local e volta para a tela de login.
+  void sair() {
+    _authService.logout();
+    autenticado = false;
+    nomeUsuarioLogado = '';
+    navegarParaLogin();
   }
 
   /// Atualiza todos os dados de referência exibidos no painel.

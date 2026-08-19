@@ -1,0 +1,101 @@
+<div class="pagina-administracao">
+  <header class="cabecalho">
+    <div>
+      <p class="marca">Administração</p>
+      <h1>Órgãos</h1>
+    </div>
+  </header>
+
+  <form class="filtros" (submit)="onBuscarSubmit($event)">
+    <div class="campo-filtro">
+      <label for="filtro-sigla">Sigla</label>
+      <input id="filtro-sigla" type="text" [value]="filtroSigla" (input)="onFiltroSiglaChange($event)">
+    </div>
+    <div class="campo-filtro">
+      <label for="filtro-ativo">Situação</label>
+      <select id="filtro-ativo" [value]="filtroAtivo" (change)="onFiltroAtivoChange($event)">
+        <option value="">Todas</option>
+        <option value="true">Ativo</option>
+        <option value="false">Inativo</option>
+      </select>
+    </div>
+    <div class="acoes-filtro">
+      <button type="submit" class="botao-buscar">Buscar</button>
+      <button type="button" class="botao-limpar" (click)="limparFiltros()">Limpar</button>
+    </div>
+  </form>
+
+  <section class="lista-catalogo">
+    <div class="lista-cabecalho">
+      <h2>Órgãos</h2>
+      <span *ngIf="!exibirCarregando && erro == null">{{ total }} órgãos</span>
+    </div>
+
+    <p class="carregando" *ngIf="exibirCarregando">Carregando órgãos...</p>
+
+    <section class="erro" *ngIf="exibirErro" role="alert">
+      <h3>Não foi possível carregar os órgãos</h3>
+      <p>{{ erro }}</p>
+    </section>
+
+    <p class="vazio" *ngIf="exibirVazio">Nenhum órgão encontrado para os filtros informados.</p>
+
+    <div class="tabela-rolagem" *ngIf="exibirTabela">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Sigla</th>
+            <th scope="col">Descrição</th>
+            <th scope="col">Situação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of itens" (click)="selecionarItem(item)" class="linha-selecionavel">
+            <td>{{ item.sigla }}</td>
+            <td>{{ item.descricao }}</td>
+            <td><span class="situacao" [class.inativa]="!item.ativo">{{ item.ativo ? 'Ativo' : 'Inativo' }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <nav class="paginacao" *ngIf="exibirPaginacao" aria-label="Paginação de órgãos">
+      <p class="paginacao-resumo" aria-live="polite">{{ rotuloPaginacao }}</p>
+      <div class="paginacao-acoes">
+        <button type="button" [disabled]="!podeVoltarPagina" (click)="solicitarPaginaAnterior()">Anterior</button>
+        <button type="button" [disabled]="!podeAvancarPagina" (click)="solicitarProximaPagina()">Próxima</button>
+      </div>
+    </nav>
+  </section>
+
+  <section class="secao-detalhe" *ngIf="itemSelecionado != null">
+    <header>
+      <div>
+        <h3>Detalhe do órgão — {{ itemSelecionado?.sigla }}</h3>
+        <p>Consulta somente leitura.</p>
+      </div>
+      <button type="button" (click)="fecharDetalhe()">Fechar</button>
+    </header>
+
+    <p class="carregando" *ngIf="carregandoDetalhe">Carregando detalhe...</p>
+
+    <section class="erro" *ngIf="erroDetalhe != null" role="alert">
+      <p>{{ erroDetalhe }}</p>
+    </section>
+
+    <dl class="detalhe-campos" *ngIf="detalhe != null">
+      <dt>ID</dt>
+      <dd>{{ detalhe?.idOrgao }}</dd>
+      <dt>Sigla</dt>
+      <dd>{{ detalhe?.sigla }}</dd>
+      <dt>Descrição</dt>
+      <dd>{{ detalhe?.descricao }}</dd>
+      <dt>Situação</dt>
+      <dd>{{ detalhe?.ativo == true ? 'Ativo' : 'Inativo' }}</dd>
+      <ng-container *ngIf="detalhe?.codigoSei != null">
+        <dt>Código SEI</dt>
+        <dd>{{ detalhe?.codigoSei }}</dd>
+      </ng-container>
+    </dl>
+  </section>
+</div>

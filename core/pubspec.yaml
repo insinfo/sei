@@ -9,8 +9,9 @@ dependencies:
   intl: any
   collection: any
   http: any
-  essential_core: ^1.4.0 
-  uuid: any 
+  essential_core: ^1.4.0
+  uuid: any
+  crypto: ^3.0.7
 
 dev_dependencies:
   test: any

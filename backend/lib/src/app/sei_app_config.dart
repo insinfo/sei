@@ -25,6 +25,64 @@ class SeiAppConfig {
   String get desenvolvimentoUsuarioSigla =>
       _env['desenvolvimento_usuario_sigla']?.trim() ?? 'teste';
 
+  /// Segredo simétrico usado para assinar e verificar o JWT de sessão.
+  ///
+  /// Tem um valor padrão de desenvolvimento para não travar o ambiente
+  /// local, mas deve ser sobrescrito por `jwt_secret` em qualquer ambiente
+  /// que não seja a máquina de desenvolvimento.
+  String get jwtSecret => _env['jwt_secret']?.trim().isNotEmpty == true
+      ? _env['jwt_secret']!.trim()
+      : 'chave-dev-sei-dart-nao-usar-em-producao';
+
+  /// Duração de validade do JWT de sessão emitido pelo login.
+  Duration get jwtDuracao =>
+      Duration(hours: _inteiro('jwt_duracao_horas', padrao: 8));
+
+  /// URL pública (`iss`) do provider OIDC deste backend. Base para montar
+  /// `authorization_endpoint`, `token_endpoint` etc. no discovery document.
+  String get oidcIssuerUrl => _env['oidc_issuer_url']?.trim().isNotEmpty == true
+      ? _env['oidc_issuer_url']!.trim()
+      : 'http://localhost:$serverPort';
+
+  /// Caminho do arquivo com a chave privada RSA (JWK) usada para assinar
+  /// `id_token`/`access_token` do provider OIDC. Gerado por
+  /// `backend/scripts/gera_chave_oidc.dart`, nunca commitado
+  /// (`.certificates/` está no `.gitignore`).
+  String get oidcChavePrivadaCaminho =>
+      _env['oidc_chave_privada_caminho']?.trim().isNotEmpty == true
+          ? _env['oidc_chave_privada_caminho']!.trim()
+          : '.certificates/sei_idp_private_key.json';
+
+  /// Caminho do arquivo com a chave pública RSA (JWK) correspondente,
+  /// publicada em `GET /oauth2/jwks`.
+  String get oidcChavePublicaCaminho =>
+      _env['oidc_chave_publica_caminho']?.trim().isNotEmpty == true
+          ? _env['oidc_chave_publica_caminho']!.trim()
+          : '.certificates/sei_idp_public_key.json';
+
+  /// Validade do `access_token` emitido pelo provider OIDC.
+  Duration get oidcAccessTokenDuracao => Duration(
+        minutes: _inteiro('oidc_access_token_duracao_minutos', padrao: 60),
+      );
+
+  /// Validade do `id_token` emitido pelo provider OIDC.
+  Duration get oidcIdTokenDuracao => Duration(
+        minutes: _inteiro('oidc_id_token_duracao_minutos', padrao: 60),
+      );
+
+  /// Validade do código de autorização de uso único (`authorize` →
+  /// `token`). Curta por definição — só precisa sobreviver ao redirecionamento
+  /// do navegador entre os dois passos.
+  Duration get oidcCodigoAutorizacaoDuracao => Duration(
+        minutes: _inteiro('oidc_codigo_autorizacao_duracao_minutos', padrao: 5),
+      );
+
+  /// Validade do `refresh_token` emitido quando o escopo concedido inclui
+  /// `offline_access`.
+  Duration get oidcRefreshTokenDuracao => Duration(
+        days: _inteiro('oidc_refresh_token_duracao_dias', padrao: 30),
+      );
+
   String get sipDbName => _env['sip_db_name'] ?? 'sip_5_0_0';
   String get sipDbHost => _env['sip_db_host'] ?? dbHost;
   int get sipDbPort => _inteiro('sip_db_port', padrao: dbPort);

@@ -1,6 +1,16 @@
 import 'package:ngrouter/ngrouter.dart';
+import 'package:sei_frontend/src/modules/administracao/pages/orgaos/orgaos_page.template.dart'
+    as orgaos_page_template;
+import 'package:sei_frontend/src/modules/administracao/pages/unidades/unidades_page.template.dart'
+    as unidades_page_template;
+import 'package:sei_frontend/src/modules/administracao/pages/usuarios/usuarios_page.template.dart'
+    as usuarios_page_template;
 import 'package:sei_frontend/src/modules/app/pages/catalogo_page/catalogo_page.template.dart'
     as catalogo_page_template;
+import 'package:sei_frontend/src/modules/autenticacao/pages/login/login_page.template.dart'
+    as login_page_template;
+import 'package:sei_frontend/src/modules/autenticacao/pages/oidc_callback/oidc_callback_page.template.dart'
+    as oidc_callback_page_template;
 import 'package:sei_frontend/src/modules/processos/pages/processo_detalhe/processo_detalhe_page.template.dart'
     as processo_detalhe_page_template;
 import 'package:sei_frontend/src/shared/routes/route_paths.dart';
@@ -23,6 +33,36 @@ class AppRoutes {
     component: processo_detalhe_page_template.ProcessoDetalhePageNgFactory,
   );
 
+  /// Tela de login.
+  static final RouteDefinition login = RouteDefinition(
+    routePath: RoutePaths.login,
+    component: login_page_template.LoginPageNgFactory,
+  );
+
+  /// Callback do fluxo OIDC (Authorization Code + PKCE).
+  static final RouteDefinition oidcCallback = RouteDefinition(
+    routePath: RoutePaths.oidcCallback,
+    component: oidc_callback_page_template.OidcCallbackPageNgFactory,
+  );
+
+  /// Administração de usuários.
+  static final RouteDefinition usuarios = RouteDefinition(
+    routePath: RoutePaths.usuarios,
+    component: usuarios_page_template.UsuariosPageNgFactory,
+  );
+
+  /// Administração de unidades.
+  static final RouteDefinition unidades = RouteDefinition(
+    routePath: RoutePaths.unidades,
+    component: unidades_page_template.UnidadesPageNgFactory,
+  );
+
+  /// Administração de órgãos.
+  static final RouteDefinition orgaos = RouteDefinition(
+    routePath: RoutePaths.orgaos,
+    component: orgaos_page_template.OrgaosPageNgFactory,
+  );
+
   /// Todas as rotas registradas no outlet raiz da aplicação.
   ///
   /// [raiz] fica por último porque casa com qualquer prefixo não reconhecido
@@ -30,6 +70,11 @@ class AppRoutes {
   /// `ngrouter` seguida pelo `new_sali` de sempre colocar a rota de `/` no
   /// fim da lista.
   static final List<RouteDefinition> all = <RouteDefinition>[
+    login,
+    oidcCallback,
+    usuarios,
+    unidades,
+    orgaos,
     processoDetalhe,
     raiz,
   ];

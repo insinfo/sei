@@ -194,3 +194,176 @@ button:disabled {
     color: #991b1b;
     background: #fee2e2;
 }
+
+// Chrome compartilhado pelas três telas de administração (usuários,
+// unidades, órgãos) em `lib/src/modules/administracao/pages/`: cabeçalho,
+// formulário de filtro, tabela paginada e painel de detalhe somem-leitura
+// são idênticos entre as três, então o layout mora aqui — cada `.scss` de
+// página guarda só o `:host`. `.tabela-rolagem`, `.lista-catalogo`,
+// `.lista-cabecalho`, `.situacao`, `.secao-detalhe`, `.erro`, `.carregando`
+// e `.vazio` (definidos acima) já cobrem cartão da lista, tabela e painel
+// de detalhe — o bloco abaixo cobre só o que falta: página, filtros e
+// paginação.
+.pagina-administracao {
+    max-width: 76rem;
+    padding: 1.5rem;
+    margin: 0 auto;
+}
+
+.pagina-administracao .cabecalho {
+    margin-bottom: 1.25rem;
+}
+
+.pagina-administracao .marca {
+    margin: 0 0 0.15rem;
+    color: #64748b;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.pagina-administracao h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.4rem;
+}
+
+.filtros {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.85rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: #fff;
+    border: 1px solid #dbe2ea;
+    border-radius: 0.35rem;
+}
+
+.campo-filtro {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 10rem;
+}
+
+.campo-filtro label {
+    color: #334155;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.campo-filtro input,
+.campo-filtro select {
+    box-sizing: border-box;
+    padding: 0.5rem 0.6rem;
+    color: #1e293b;
+    background: #fff;
+    border: 1px solid #94a3b8;
+    border-radius: 0.3rem;
+    font: inherit;
+}
+
+.acoes-filtro {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.botao-buscar,
+.botao-limpar {
+    padding: 0.55rem 0.9rem;
+    border: 1px solid #0e7490;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+
+.botao-buscar {
+    color: #fff;
+    background: #0e7490;
+}
+
+.botao-limpar {
+    color: #075985;
+    background: #fff;
+}
+
+.linha-selecionavel {
+    cursor: pointer;
+}
+
+.linha-selecionavel:hover {
+    background: #f0f9ff;
+}
+
+.paginacao {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    border-top: 1px solid #dbe2ea;
+}
+
+.paginacao-resumo {
+    margin: 0;
+    color: #475569;
+    font-size: 0.875rem;
+}
+
+.paginacao-acoes {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.paginacao button {
+    min-width: 5.5rem;
+    border: 1px solid #0e7490;
+    border-radius: 0.25rem;
+    padding: 0.45rem 0.75rem;
+    color: #075985;
+    background: #fff;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.paginacao button:disabled {
+    border-color: #cbd5e1;
+    color: #94a3b8;
+    background: #f8fafc;
+    cursor: not-allowed;
+}
+
+.detalhe-campos {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.4rem 1rem;
+    margin: 1rem 0 0;
+}
+
+.detalhe-campos dt {
+    color: #64748b;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.detalhe-campos dd {
+    margin: 0;
+    color: #1e293b;
+}
+
+@media (max-width: 40rem) {
+    .pagina-administracao {
+        padding: 0.75rem;
+    }
+
+    .filtros {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .detalhe-campos {
+        grid-template-columns: 1fr;
+    }
+}

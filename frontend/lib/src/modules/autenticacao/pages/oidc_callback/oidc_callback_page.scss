@@ -1,0 +1,79 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.pagina-callback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1.5rem;
+  background: #eef1f4;
+}
+
+.cartao-callback {
+  width: 100%;
+  max-width: 24rem;
+  padding: 2rem 2rem 1.5rem;
+  text-align: center;
+  background: #fff;
+  border: 1px solid #dbe2ea;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 14px rgb(15 23 42 / 8%);
+}
+
+.logo-sei {
+  margin-bottom: 1.75rem;
+}
+
+.logo-marca {
+  color: #075985;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.logo-legenda {
+  margin: 0.35rem 0 0;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.callback-mensagem {
+  margin: 0;
+  color: #334155;
+  font-size: 0.9rem;
+}
+
+.callback-erro {
+  padding: 0.65rem 0.75rem;
+  margin: 0 0 1rem;
+  color: #7f1d1d;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.3rem;
+  font-size: 0.85rem;
+}
+
+.botao-tentar-novamente {
+  width: 100%;
+  padding: 0.75rem;
+  color: #fff;
+  background: #075985;
+  border: 0;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.botao-tentar-novamente:hover {
+  background: #0c4a6e;
+}
+
+.botao-tentar-novamente:focus-visible {
+  outline: 3px solid #7dd3fc;
+  outline-offset: 2px;
+}
