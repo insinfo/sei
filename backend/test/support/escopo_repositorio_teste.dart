@@ -51,6 +51,31 @@ class EscopoRepositorioTeste {
   /// Resolve um repository pela mesma factory registrada no DI de produção.
   R make<R>() => _container.make<R>();
 
+  /// Executa o callback dentro de uma transação sempre revertida ao final.
+  ///
+  /// A Base de Referência não pode ganhar dado sintético, mas as consultas
+  /// precisam ser exercitadas contra linhas reais. A transação resolve os dois
+  /// lados: a fixture é inserida, as asserções rodam e o `rollback` é forçado
+  /// por uma exceção sentinela, de modo que nada é confirmado no banco.
+  ///
+  /// O escopo recebido é um contêiner-filho com a conexão da transação
+  /// registrada, portanto os repositórios saem das mesmas fábricas do DI de
+  /// produção e enxergam a fixture.
+  Future<void> emTransacaoRevertida(
+    Future<void> Function(Container escopo, Connection conexao) callback,
+  ) async {
+    try {
+      await _connection.transaction((Connection contexto) async {
+        final Container escopo = _app.container.createChild();
+        escopo.registerSingleton<Connection>(contexto);
+        await callback(escopo, contexto);
+        throw const _ReversaoDaFixture();
+      });
+    } on _ReversaoDaFixture {
+      return;
+    }
+  }
+
   /// Libera a conexão e os recursos de infraestrutura do escopo de teste.
   Future<void> dispose() async {
     if (!_servicoConexao.usaPool) {
@@ -59,4 +84,12 @@ class EscopoRepositorioTeste {
     await _servicoConexao.dispose();
     await _app.close();
   }
+}
+
+/// Sentinela que força o `rollback` da transação de fixture.
+///
+/// Ela não representa erro: é o mecanismo que garante que a Base de
+/// Referência volte exatamente ao estado anterior ao teste.
+class _ReversaoDaFixture implements Exception {
+  const _ReversaoDaFixture();
 }

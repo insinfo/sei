@@ -1,0 +1,61 @@
+﻿id;categoria;recurso;escopo;finalidade;vantagens;limitacoes;visibilidade;efeito_estado;fonte
+NAV-001;Navegação;Autenticação em dois fatores;Usuário;Reforçar login com código temporário;Maior segurança;Depende de ativação e recuperação segura;Usuário;Nenhum;Manual do Usuário SEI 4.0+
+NAV-002;Navegação;Troca de unidade;Usuário/unidade;Alternar contexto organizacional;Uma conta atua em várias unidades;Ações ficam vinculadas à unidade selecionada;Usuário;Muda contexto;Manual do Usuário SEI 4.0+
+NAV-003;Navegação;Controle de Processos;Unidade;Listar processos abertos;Fila operacional e ações em lote;Não lista concluídos/arquivados por padrão;Unidade;Consulta abertura;Manual do Usuário SEI 4.0+
+NAV-004;Navegação;Painel de Controle;Unidade;Resumir indicadores e filas;Visão gerencial configurável;Não é motor de workflow;Unidade;Nenhum;Manual do Usuário SEI 4.0+
+PROC-001;Processo;Iniciar Processo;Processo;Criar processo e NUP;Padronização;Depende de tipos habilitados;Compartilhado;Cria processo e abre unidade;Manual do Usuário SEI 4.0+
+PROC-002;Processo;Receber Processo;Unidade;Confirmar recebimento;Registra usuário/data/hora;Até receber aparece em vermelho;Compartilhado no histórico;Confirma recebimento;Manual do Usuário SEI 4.0+
+PROC-003;Processo;Atribuir Processo;Unidade;Distribuir responsabilidade;Organização da equipe;Não bloqueia outros usuários e não é visível fora;Unidade;Nenhum;Manual do Usuário SEI 4.0+
+PROC-004;Processo;Enviar Processo;Processo/unidades;Tramitar para uma ou várias unidades;Fluxo sequencial ou paralelo;Paralelismo só para atividades independentes;Compartilhado;Abre destinos e conclui origem por padrão;Manual do Usuário SEI 4.0+
+PROC-005;Processo;Manter processo aberto;Unidade;Preservar origem no envio;Trabalho paralelo;Inflaciona estatísticas e pode duplicar trabalho;Unidades envolvidas;Mantém contexto aberto;Manual do Usuário SEI 4.0+
+PROC-006;Processo;Concluir Processo;Unidade;Encerrar trabalho da unidade;Retira da fila ativa;Não conclui outras unidades e não arquiva;Histórico compartilhado;Fecha contexto da unidade;Manual do Usuário SEI 4.0+
+PROC-007;Processo;Reabrir Processo;Unidade;Reativar unidade anterior;Dispensa novo envio;Deve ser usado só para nova providência;Histórico compartilhado;Abre contexto e atribui usuário;Manual do Usuário SEI 4.0+
+PROC-008;Processo;Atualizar Andamento;Processo;Registrar informação no histórico;Rápido e auditável;Não substitui documento formal;Compartilhado;Adiciona evento;Manual do Usuário SEI 4.0+
+PROC-009;Processo;Ciência;Processo/unidade;Registrar ciência;Dispensa documento só para ciência;Não significa aprovação;Compartilhado;Adiciona evento;Manual do Usuário SEI 4.0+
+PROC-010;Processo;Relacionar Processos;Processo;Vincular sem fundir;Mantém independência;Não compartilha árvore nem estado;Compartilhado;Cria relação;Manual do Usuário SEI 4.0+
+PROC-011;Processo;Anexar Processo;Processo;Incorporar permanentemente;Consolida instrução;Exige regras rígidas e é praticamente irreversível;Compartilhado;Subordina processo anexado;Manual do Usuário SEI 4.0+
+PROC-012;Processo;Duplicar Processo;Processo;Criar novo a partir de documentos;Reutilização;Gera novo NUP sem sincronização;Compartilhado;Cria outro processo;Manual do Usuário SEI 4.0+
+PROC-013;Processo;Sobrestar Processo;Unidade/processo;Suspender temporariamente;Registra motivo e retira da fila normal;Não é conclusão nem arquivo;Compartilhado conforme acesso;Cria suspensão;Manual do Usuário SEI 4.0+
+ORG-001;Organização;Controle de Prazos;Unidade;Gerir prazo interno;Sinaliza vencimento;"Outra unidade não vê; concluir prazo não conclui processo";Unidade;Nenhum;Manual do Usuário SEI 4.0+
+ORG-002;Organização;Retorno Programado;Unidades;Cobrar devolução;Controle bilateral;Não devolve automaticamente;Unidades envolvidas;Adiciona prazo de retorno;Manual do Usuário SEI 4.0+
+ORG-003;Organização;Acompanhamento Especial;Unidade;Acompanhar sem manter aberto;Evita fila e estatística inflada;Não é ato processual;Unidade;Nenhum;Manual do Usuário SEI 4.0+
+ORG-004;Organização;Marcadores;Unidade;Etiquetar por cor/nome/texto;Flexível;Não é transmitido;Unidade;Nenhum;Manual do Usuário SEI 4.0+
+ORG-005;Organização;Anotações;Unidade;Orientação interna;Comunicação rápida;Não visível fora e não integra autos;Unidade;Nenhum;Manual do Usuário SEI 4.0+
+ORG-006;Organização;Comentários;Processo/documento;Comunicação contextual;Visível às unidades autorizadas;Não integra instrução;Conforme acesso;Nenhum;Manual do Usuário SEI 4.0+
+ORG-007;Organização;Ponto de Controle;Processo;Marcar fase/categoria;Indicadores e gráficos;Não obriga fluxo;Conforme configuração;Altera fase gerencial;Manual do Usuário SEI 4.0+
+ORG-008;Organização;Plano de Trabalho;Processo;Sequenciar atividades;Organiza execução;Depende de configuração e versão 4.1+;Conforme acesso;Altera plano;Manual do Usuário SEI 4.0+
+DOC-001;Documento;Documento Interno;Processo;Criar HTML no editor;Assinatura, versões e padrões;Layout inferior a suíte Office;Conforme acesso;Adiciona minuta/documento;Manual do Usuário SEI 4.0+
+DOC-002;Documento;Documento Externo;Processo;Incluir arquivo;Preserva original;Extensão/tamanho/OCR dependem de configuração;Conforme acesso;Adiciona documento;Manual do Usuário SEI 4.0+
+DOC-003;Documento;Formulário do Sistema;Processo;Capturar dados estruturados;Validação e máscaras;Layout limitado;Conforme acesso;Adiciona documento;Manual do Administrador SEI
+DOC-004;Documento;Versões do Documento;Documento;Rastrear alterações;Comparação e histórico;Não é colaboração em tempo real;Unidade/autorizados;Cria versão;Manual do Usuário SEI 4.0+
+DOC-005;Documento;Assinar Documento;Documento;Autenticar/autorar;Integridade e validade;Depende de perfil/cargo/certificado;Conforme acesso;Torna documento assinado;Manual do Usuário SEI 4.0+
+DOC-006;Documento;Cancelar Documento;Documento;Declarar sem efeito preservando registro;Rastreabilidade;Não aparece no PDF consolidado;Conforme acesso;Cancela documento;Manual do Usuário SEI 4.0+
+DOC-007;Documento;Mover Documento Externo;Documento/processo;Corrigir pasta de documento externo;Evita duplicação;Internos não são movidos;Conforme acesso;Muda processo do externo;Manual do Usuário SEI 4.0+
+DOC-008;Documento;Ordenar Árvore;Processo;Reorganizar sequência visual;Melhora leitura;Não muda datas/histórico;Conforme acesso;Altera ordem;Manual do Usuário SEI 4.0+
+TPL-001;Padronização;Modelo do Editor;Institucional;Definir estrutura documental;Padronização forte;Administração/HTML;Institucional;Configuração;Manual do Administrador SEI
+TPL-002;Padronização;Documento Favorito;Unidade;Reutilizar documento integral;Produtividade;Pode copiar conteúdo desatualizado;Unidade;Nenhum;Manual do Usuário SEI 4.0+
+TPL-003;Padronização;Texto Padrão;Unidade;Reutilizar fragmento;Padronização;Não é documento completo;Unidade;Nenhum;Manual do Usuário SEI 4.0+
+KNW-001;Conhecimento;Base de Conhecimento;Tipo de processo;Documentar procedimento;Compartilha conhecimento e versões;Não automatiza workflow;Usuários autorizados;Nenhum;Manual do Usuário SEI 4.0+
+BLK-001;Blocos;Bloco de Assinatura;Unidades;Compartilhar minutas para assinatura;Evita tramitar processo;Não transfere responsabilidade formal;Unidades disponibilizadas;Estado do bloco;Manual do Usuário SEI 4.0+
+BLK-002;Blocos;Bloco de Reunião;Unidades;Compartilhar para discussão;Visualiza minutas;Sem atuação formal;Unidades disponibilizadas;Estado do bloco;Manual do Usuário SEI 4.0+
+BLK-003;Blocos;Bloco Interno;Unidade;Agrupar processos;Organização local;Só unidade e inclusão exige aberto;Unidade;Nenhum;Manual do Usuário SEI 4.0+
+COM-001;Comunicação;Contatos;Institucional/unidade;Cadastrar interessados/remetentes/destinatários;Padroniza metadados;Duplicidade e desatualização;Conforme cadastro;Nenhum;Manual do Administrador SEI
+COM-002;Comunicação;Grupo de Contatos;Unidade/institucional;Selecionar contatos em lote;Agilidade;Não concede acesso;Unidade/institucional;Nenhum;Manual do Administrador SEI
+COM-003;Comunicação;Grupo de E-mail;Unidade/institucional;Enviar mensagens em lote;Agilidade;Não é ACL;Unidade/institucional;Nenhum;Manual do Administrador SEI
+COM-004;Comunicação;Grupo de Envio;Unidade/institucional;Selecionar unidades em lote;Agilidade;Pode criar paralelismo inadequado;Unidade/institucional;Nenhum;Manual do Administrador SEI
+COM-005;Comunicação;Acesso Externo;Processo/documento;Liberar consulta externa;Compartilhamento controlado;Exige prazo, escopo e LGPD;Usuário externo;Cria autorização;Manual do Usuário SEI 4.0+
+COM-006;Comunicação;Assinatura Externa;Documento;Coletar assinatura de externo;Formaliza participação;Exige cadastro/liberação;Usuário externo;Assina documento;Manual do Usuário SEI 4.0+
+EXP-001;Exportação;Gerar PDF;Processo/documento;Consolidar documentos;Leitura e compartilhamento;"Síncrono no fluxo padrão; omite formatos/regras";Usuário autorizado;Nenhum;Manual do Usuário SEI 4.0+
+EXP-002;Exportação;Gerar ZIP;Processo;Baixar originais;Preserva formatos;Pode ser grande;Usuário autorizado;Nenhum;Manual do Usuário SEI 4.0+
+SRC-001;Pesquisa;Pesquisa Rápida;Instalação;Localizar NUP/termo;Rápida;Depende de indexação e acesso;Conforme acesso;Nenhum;Manual do Usuário SEI 4.0+
+SRC-002;Pesquisa;Pesquisa Estruturada;Instalação;Combinar filtros;Precisão;Depende de metadados;Conforme acesso;Nenhum;Manual do Usuário SEI 4.0+
+SRC-003;Pesquisa;Pesquisar no Processo;Processo;Localizar termo;Útil em árvore grande;Sem OCR/minutas podem faltar;Conforme acesso;Nenhum;Manual do Usuário SEI 4.0+
+ARC-001;Gestão documental;Arquivar Processo;Processo;Iniciar guarda e encerrar ação administrativa;Gestão arquivística;Exige zero unidades abertas e perfil;Conforme acesso;Arquiva e bloqueia atos;Módulo Gestão Documental
+ARC-002;Gestão documental;Desarquivar Processo;Processo/unidade;Retomar processo arquivado;Retorno controlado;Exige perfil e justificativa;Conforme acesso;Desarquiva e abre unidade;Módulo Gestão Documental
+ARC-003;Gestão documental;Avaliação e Eliminação;Acervo;Aplicar temporalidade/destinação;Conformidade arquivística;Fluxo formal e irreversível na eliminação;Perfis especializados;Destinação final;Módulo Gestão Documental
+ADM-001;Administração;Tipo de Processo;Institucional;Configurar categorias, assunto e acesso;Padronização;Governança arquivística necessária;Institucional;Configuração;Manual do Administrador SEI
+ADM-002;Administração;Hipótese Legal;Institucional;Fundamentar restrição/sigilo;Conformidade;Base legal deve ser válida;Institucional;Configuração;Manual do Administrador SEI
+ADM-003;Administração;Tipo de Documento;Institucional;Configurar espécies e numeração;Padronização;Exclusão pode ser irreversível;Institucional;Configuração;Manual do Administrador SEI
+ADM-004;Administração;Extensões Permitidas;Instalação;Controlar uploads;Segurança;Formato pode não ser convertível/pesquisável;Instalação;Configuração;Manual do Administrador SEI
+ADM-005;Administração;Sistemas/Web Services;Integração;Autorizar sistemas externos;Integração controlada;Chaves e escopo devem ser mínimos;Sistemas autorizados;Configuração;Manual do Administrador SEI
+ADM-006;Administração;Auditoria/Logs;Instalação;Rastrear e diagnosticar;Investigação;Dados técnicos sensíveis e volume;Perfis restritos;Nenhum;Manual do Administrador SEI

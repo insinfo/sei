@@ -33,4 +33,9 @@ void registrarRotasCatalogos(
     catalogoController.series,
     middleware: middlewares,
   );
+  app.get(
+    '/api/v1/catalogos/tarefas',
+    catalogoController.tarefas,
+    middleware: middlewares,
+  );
 }

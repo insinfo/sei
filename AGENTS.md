@@ -28,8 +28,13 @@ Este arquivo é a fonte única de instruções do repositório.
 
 - Classes de modelo ou DTO compartilhadas entre `backend`, `frontend` e `core` devem ficar no pacote `core`.
 - Todo modelo ou DTO criado no `core/lib/src/models` deve implementar `BaseModel`.
-- Exporte novos modelos/DTOs em `core/lib/new_sali_core.dart`.
-- Ao usar DTOs/modelos do `core` fora do pacote, importe `package:new_sali_core/new_sali_core.dart` explicitamente quando o barrel local nao exportar esses tipos.
+- **Todo model que grava dados em tabela do banco deve sobrescrever `toInsertMap()` e `toUpdateMap()`.** Um model é considerado persistível quando alguma escrita — `insert`, `insertGetId`, `insertMany`, `update` — recebe os campos dele, inclusive em fixture de teste e em script de carga. Nesse caso, é proibido montar o `Map<String, dynamic>` de escrita à mão no repository, no service ou no teste: o mapa vem do model.
+- `toInsertMap()` retorna as colunas aceitas em uma inserção e **omite a chave primária gerada pelo banco**; quando o identificador é atribuído pela aplicação, ele entra no mapa e isso fica registrado no Dartdoc do model. `toUpdateMap()` retorna somente as colunas atualizáveis e **nunca inclui a chave de identidade**, que pertence ao filtro da query.
+- As chaves dos dois mapas são as **constantes de coluna do próprio model** (`idProcessoCol`, `dataAberturaCol`), nunca literais soltos, e correspondem aos nomes reais das colunas da tabela — diferentemente de `toMap()`, que é contrato de transporte da API e pode expor nomes de projeção.
+- Projeção de consulta, envelope de página, filtro e DTO de resposta **não** são persistíveis: eles mantêm a implementação herdada de `BaseModel`, que lança `UnsupportedError`. Isso é intencional e impede que uma projeção incompleta seja gravada em tabela por acidente.
+- Model persistível que a tela edita também deve oferecer construtor de instância nova (`nova()`/`vazia()`) e cópia independente (`clone()`/`copyWith()`), conforme já fazem `Serie` e `TipoProcedimento`.
+- Exporte novos modelos/DTOs em `core/lib/sei_core.dart`.
+- Ao usar DTOs/modelos do `core` fora do pacote, importe `package:sei_core/sei_core.dart` explicitamente quando o barrel local nao exportar esses tipos.
 - Prefira modelos/DTOs tipados em assinaturas de services, repositories, controllers e paginas.
 - Evite expor `Map<String, dynamic>` como contrato entre camadas quando for possivel criar ou reaproveitar um modelo/DTO.
 - Use `Map<String, dynamic>` apenas nas bordas onde ele e inevitavel, como parsing de JSON, serializacao, SQL bruto ou snapshots genericos de auditoria.
@@ -149,7 +154,7 @@ final rows = await query.get();
 ### Criação de índices
 
 - Antes de propor/criar um índice, **consulte a base de dados local** para: (1) ver se um índice equivalente **já existe** (`SELECT indexname, indexdef FROM pg_indexes WHERE tablename = '...'`); (2) medir o **tamanho da tabela** (`SELECT count(*) ...`); (3) validar o **plano** com `EXPLAIN (ANALYZE, BUFFERS)` antes e depois, confirmando index-only scan / ausência de sort; (4) **avaliar o impacto na escrita**, principalmente no **cadastro de processo** e outros fluxos de INSERT quentes — um índice a mais é mantido a cada insert.
-- Conexão local (do `backend/.env`): `db_name=siamweb`, `db_host=localhost`, `db_port=5432`, `db_user=sisadmin`, `db_pass=s1sadm1n`. Ex.: `PGPASSWORD=s1sadm1n psql -U sisadmin -h localhost -p 5432 -d siamweb -c "..."`.
+- Conexão local (do `backend/.env`): `db_name=sei_5_0_0`, `db_host=localhost`, `db_port=5432`, `db_user=dart`, `db_pass=dart`. Ex.: `PGPASSWORD=dart psql -U dart -h localhost -p 5432 -d sei_5_0_0 -c "..."`. A base SIP é separada: `sip_5_0_0`, mesmo usuário e senha.
 - Prefira o índice **mais estreito que resolve** e que **cobre** a query (index-only scan). Para tabelas grandes em produção, crie com `CREATE INDEX CONCURRENTLY IF NOT EXISTS` (fora de transação) para **não bloquear** gravações durante o build.
 
 - Caso real (6.2.0): a rota de uso de atributo filtra `sw_assunto_atributo_valor` (~1M linhas) por `cod_atributo`, que era a 3ª coluna da PK → seq scan. Como para bloquear a troca de tipo **basta saber se é usado ao menos uma vez** (`EXISTS`, não `COUNT`), o índice de **coluna única** `(cod_atributo)` já deixa o EXISTS instantâneo — inclusive para o atributo **não usado** (index lookup não acha nada, sem varrer 1M linhas) — com impacto desprezível no cadastro. Migration `15_acao_rota_atributo_protocolo_uso_e_index.sql`.

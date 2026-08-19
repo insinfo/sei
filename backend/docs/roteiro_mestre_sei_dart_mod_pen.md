@@ -1957,6 +1957,16 @@ O maior erro seria tentar desenvolver “todas as telas do SEI” antes de prova
 - `analise_tecnica_dumps_sei.md`: resumo estrutural sem dados pessoais;
 - `inventario_schema_sei_5_0_0.csv`: inventário das 194 tabelas;
 - `manifesto_compatibilidade_sei_dart.json`: manifesto legível por máquina com hashes e estatísticas;
+- `arquitetura_backend.md`: regra de implementação de `backend/lib/src`;
+- `inventario_funcional_sei.md`: inventário funcional do SEI com comportamento,
+  vantagem e limitação de cada recurso, provado no corpus local;
+- `evidencias_controle_processos.md`: provas da separação entre Recebidos e
+  Gerados;
+- `evidencias_processo_detalhe.md`: provas dos códigos de domínio de
+  `sta_protocolo`, `sta_estado`, `sta_associacao`, `sta_participacao` e do
+  catálogo de tarefas, com as lacunas que permanecem;
+- `sei-backend-docs-inventario-2026-08-18/`: pacote de inventário funcional
+  recebido, com capturas de tela, CSV e JSON estruturados;
 - `roteiro_mestre_sei_dart_mod_pen.md`: este documento.
 
 ---
@@ -2294,6 +2304,45 @@ Adotar NgDart 8 e `limitless_ui`, porém criar uma camada de tema compatível co
 SEI 5. Os componentes de `limitless_ui` devem ser configurados para reproduzir
 densidade e comportamento do SEI, sem impor aparência moderna no modo padrão.
 
+**Estrutura de pastas e SCSS: seguir `C:\MyDartProjects\new_sali\frontend`.**
+É um padrão sólido, comprovado em produção, e o `sei/frontend` deve replicá-lo
+em vez de inventar uma organização própria:
+
+```text
+frontend/
+  web/
+    style.scss              # entrada única; @use nos parciais de tema
+    blu_theme.scss          # parcial de tema (equivalente ao tema SEI)
+    fancytree.scss          # parcial de biblioteca de terceiro
+  lib/src/
+    modules/
+      <modulo>/              # ex.: processos, documentos, blocos
+        components/<nome>/   # peça reutilizável dentro do módulo
+        pages/<nome>/         # página de rota, container
+        models/               # DTO específico da tela, quando não é do core
+        services/              # chamada HTTP e regra de tela do módulo
+    shared/
+      components/ di/ directives/ exceptions/ extensions/
+      js_interop/ models/ pipes/ routes/ services/ utils/
+```
+
+Consequências diretas desse padrão:
+
+- **Um único `style.scss`** como raiz de estilos, com `@use '<parcial>' as *;`
+  para cada arquivo de tema — não múltiplos SCSS por componente. O NgDart 8
+  deste projeto não isola estilo por componente da forma que frameworks mais
+  recentes fazem; centralizar evita regra duplicada ou cascata imprevisível.
+- **Página de rota mora em `pages/`, peça reutilizável mora em
+  `components/`** — a mesma distinção que a seção seguinte já exige
+  ("página de rota como container"), agora também expressa na pasta.
+- **`models/` e `services/` de módulo são exceção, não regra.** DTO
+  compartilhado com `backend`/`core` vai para `core/lib/src/models`, como já
+  determina a seção "Arquitetura, modelos e DTOs" do `AGENTS.md`; `models/` do
+  módulo do frontend só existe para estado de tela que não cruza pacote.
+- **`shared/` do frontend espelha o vocabulário do `new_sali`**: um
+  componente, diretiva, pipe ou serviço realmente reutilizável por mais de um
+  módulo vai lá; o que serve a um módulo só fica dentro dele.
+
 Regras obrigatórias:
 
 - página de rota como container;
@@ -2463,6 +2512,28 @@ ProcessoPage
 A seleção na árvore deve atualizar conteúdo, URL e ações de forma atômica. Ao
 recarregar a URL, o mesmo item precisa reaparecer selecionado. Processo longo deve
 usar carregamento incremental sem alterar a ordem observada no SEI.
+
+Estado da API que sustenta esta composição:
+
+| Componente | Rota | Situação |
+| --- | --- | --- |
+| `ProcessoCabecalhoComponent` | `GET /api/v1/processos/:id/cabecalho` | pronta |
+| `ProcessoArvoreComponent` | `GET /api/v1/processos/:id/documentos` | pronta, com cursor |
+| Consultar Andamento | `GET /api/v1/processos/:id/andamentos` | pronta, com cursor |
+| `ProcessoUnidadesAbertasComponent` | `GET /api/v1/processos/:id/unidades-abertas` | pronta |
+| `ProcessoRelacionadosComponent` | `GET /api/v1/processos/:id/relacionados` | pronta, nos dois sentidos |
+| Interessados no cabeçalho | `GET /api/v1/processos/:id/participantes` | pronta |
+| Anotações | `GET /api/v1/processos/:id/anotacoes?idUnidade=` | pronta, filtrada por unidade |
+| Marcadores | `GET /api/v1/processos/:id/marcadores` | pronta, só os vigentes |
+| Acompanhamento Especial | `GET /api/v1/processos/:id/acompanhamentos` | pronta, sem exigir processo aberto |
+| Controle de Prazos | `GET /api/v1/processos/:id/controles-prazo?idUnidade=` | pronta, filtrada por unidade |
+| Retorno Programado | `GET /api/v1/processos/:id/retornos-programados` | pronta, com `cumprido` calculado |
+| `ProcessoConteudoComponent` | `GET /api/v1/processos/:id/documentos/:idDocumento/conteudo` | pronta; ponteiro de arquivo para externo, sem o byte |
+| `ProcessoAcoesComponent` | comandos por perfil e estado | pendente, depende de autorização SIP |
+
+Faltam ainda, para a tela ficar equivalente em leitura: processos anexados,
+Ponto de Controle (sem linha real nas fontes locais para comprovar o domínio),
+Blocos (Assinatura, Reunião, Interno) e Base de Conhecimento.
 
 ### 30.3 Editor
 
@@ -3096,6 +3167,154 @@ Esta fatia **não é autenticação SIP** e não afirma autorização equivalent
 E2 ainda depende de autenticação, autorização por recurso, fixture anonimizada
 ou instalação autorizada com processo real, paginação completa, filtros e
 baseline visual diferencial.
+
+### Estado de execução local em 18 de agosto de 2026
+
+O inventário funcional do SEI foi consolidado a partir do corpus local e está
+em `backend/docs/inventario_funcional_sei.md`, com as provas dos códigos de
+domínio em `backend/docs/evidencias_processo_detalhe.md`. Ele substitui a
+pesquisa em manuais de terceiros como referência de comportamento: o manual
+oficial do usuário, o manual do administrador, o código do `mod-sei-pen` e a
+Base de Referência 5.0.0 já estão em `backend/referencias/`.
+
+#### Modelo operacional por unidade, agora executável
+
+A afirmação central do SEI — **o estado aberto não pertence ao processo, e sim
+ao par processo e unidade** — deixou de ser texto e virou consulta, DTO e
+teste:
+
+- `ProcessoUnidadeAberta` agrega `atividade` por unidade com `dth_conclusao`
+  nula, preserva a contagem de atividades abertas, separa unidade geradora de
+  recebedora e resolve a atribuição da atividade mais recente;
+- `GET /api/v1/processos/:id/unidades-abertas` é a projeção que sustenta o
+  `ProcessoUnidadesAbertasComponent` previsto na seção 30.2;
+- `GET /api/v1/processos/:id/relacionados` percorre os dois sentidos de
+  `rel_protocolo_protocolo`, porque o vínculo é gravado uma única vez e é
+  direcionado, embora a tela o exiba nos dois processos;
+- `GET /api/v1/processos/:id/participantes` traz interessados, remetentes e
+  destinatários com o código bruto preservado.
+
+#### Catálogo de tarefas como contrato de comportamento
+
+`GET /api/v1/catalogos/tarefas` expõe as 119 tarefas da Base de Referência com
+as quatro marcações que governam o estado do processo. É a partir delas que se
+reproduz, sem adivinhação, por que **enviar não conclui por si só**: a tarefa
+32 não fecha andamentos abertos, e quem conclui na origem é a tarefa 41,
+lançada apenas quando a opção de manter o processo aberto não é marcada. O
+teste `catalogo_repository_test.dart` trava esse comportamento contra a base
+restaurada.
+
+Códigos de domínio comprovados e implementados nesta etapa: `TipoProtocolo`
+(`P`, `G`, `R`), `EstadoProtocolo` (`0`, `2`, `4`, `5`), `AssociacaoProtocolo`
+(`1`, `3`), `ProcessoParticipacao` (`I`, `R`, `D`) e `TarefaSei`.
+
+#### Fixture transacional: dado real sem sujar a Base de Referência
+
+A restrição de não criar processo sintético na base oficial permanece, mas
+deixou de bloquear a cobertura. `EscopoRepositorioTeste.emTransacaoRevertida`
+abre uma transação, registra a conexão dela em um contêiner-filho do Angel — de
+modo que os repositórios saem das mesmas fábricas do DI de produção — e força o
+`rollback` ao final por exceção sentinela. `FixtureProcessoSei` monta o cenário
+completo e o último teste do arquivo confere que a base volta ao estado
+anterior.
+
+Isso destrava a verificação que faltava desde a E1: as consultas por unidade
+passaram a ser exercitadas contra linhas reais, e não apenas contra página
+vazia.
+
+#### Primeiras entidades graváveis do núcleo processual
+
+Com a fixture surgiu a primeira escrita do projeto, e com ela a regra agora
+registrada em `AGENTS.md`: **todo model que grava dados em tabela do banco deve
+sobrescrever `toInsertMap()` e `toUpdateMap()`**, e o mapa de escrita nunca é
+montado à mão no repositório, no service ou no teste.
+
+`Protocolo`, `Procedimento`, `Atividade`, `Participante` e `RelacaoProtocolo`
+são as primeiras entidades persistíveis do `core`. Todas atribuem o
+identificador na aplicação, porque nenhuma dessas colunas tem `DEFAULT` na
+Base de Referência — o que já antecipa a decisão da seção 5.3 sobre alocação de
+identificadores. Elas são a base da Fase 4.
+
+### Estado de execução local em 18 de agosto de 2026 — sinalizações da unidade
+
+Continuando a leitura de `backend/docs` e `backend/referencias`, a segunda
+rodada do dia cobriu os cinco recursos que a §30.2 já apontava como pendentes:
+**anotação, marcador, acompanhamento especial, controle de prazo e retorno
+programado**. Ponto de Controle ficou de fora — `situacao` e
+`andamento_situacao` têm esquema claro, mas zero linhas tanto na Base de
+Referência quanto no dump histórico, sem nenhuma linha real para cruzar.
+
+Cinco entidades persistíveis novas no `core` (`Anotacao`, `Marcador`,
+`AndamentoMarcador`, `GrupoAcompanhamento`, `Acompanhamento`, `ControlePrazo`,
+`RetornoProgramado` — sete, na verdade, contando o catálogo de grupo) seguem a
+mesma regra de `toInsertMap()`/`toUpdateMap()`, e cinco projeções de leitura
+(`ProcessoAnotacao`, `ProcessoMarcador`, `ProcessoAcompanhamento`,
+`ProcessoControlePrazo`, `ProcessoRetornoProgramado`) resolvem nome de unidade
+e de usuário via `join`. Rotas novas:
+
+- `GET /api/v1/processos/:id/anotacoes?idUnidade=` — filtra por unidade, porque
+  a anotação nunca tramita e é exclusiva de quem a criou;
+- `GET /api/v1/processos/:id/marcadores` — só os vigentes;
+- `GET /api/v1/processos/:id/acompanhamentos` — todas as unidades, sem exigir
+  processo aberto ali;
+- `GET /api/v1/processos/:id/controles-prazo?idUnidade=` — filtra por unidade;
+- `GET /api/v1/processos/:id/retornos-programados` — com `cumprido` calculado.
+
+**Achado que corrige uma suposição do roteiro.** O histórico de marcador
+(`andamento_marcador`) não é só *append*: uma remoção real também **rebaixa a
+linha até então corrente**, mudando o `sin_ultimo` dela de `S` para `N`. Isso
+foi descoberto porque o teste "marcador removido não aparece como vigente"
+falhou na primeira tentativa — inserir só a linha de remoção não bastava, a
+leitura continuava enxergando a inclusão antiga. A prova ficou registrada no
+próprio teste e em `backend/docs/evidencias_processo_detalhe.md`; deve
+orientar o service de remoção quando ele existir, para não repetir o erro em
+produção.
+
+**Achado sobre Acompanhamento Especial.** A fixture provou empiricamente, e não
+só por leitura de manual, que o recurso funciona com o processo já concluído
+na unidade que acompanha: o cenário de teste usa deliberadamente a unidade que
+concluiu o processo principal, e a leitura retorna o acompanhamento
+normalmente.
+
+### Estado de execução local em 18 de agosto de 2026 — conteúdo de documento
+
+Terceira rodada do dia: leitura do corpo do documento, a peça central do
+`ProcessoConteudoComponent` que a §30.2 listava como pendente.
+
+O cruzamento de `documento.sta_documento` com `protocolo.sta_protocolo`,
+`documento.sta_editor` e `documento.sin_versoes` no dump histórico é exato
+para os dois códigos principais (535 e 306 ocorrências, zero exceção),
+confirmando o mecanismo: documento interno tem corpo HTML em
+`documento_conteudo.conteudo`; documento externo não tem linha ali — o
+ponteiro para o arquivo vem de `anexo`, cruzado por
+`anexo.id_protocolo = documento.id_documento`, sempre 1:1. Há um terceiro
+código, `A`, com uma única ocorrência, insuficiente para significado seguro e
+por isso não declarado.
+
+Três entidades persistíveis novas no `core` (`Documento`, `DocumentoConteudo`,
+`Anexo`) e uma projeção de leitura (`ProcessoDocumentoConteudo`) que une os
+dois caminhos com `LEFT JOIN` duplo — só um lado vem preenchido, conforme o
+estado do documento. Rota nova:
+
+- `GET /api/v1/processos/:idProcesso/documentos/:idDocumento/conteudo` —
+  devolve o HTML para documento interno ou o ponteiro do anexo (nome, tamanho,
+  hash, data) para documento externo, nunca os dois.
+
+**O byte do arquivo em si não está no banco.** `anexo` só guarda metadados;
+servir o arquivo depende do `SeiFileRepository` da seção 9, ainda não
+implementado. Este endpoint entrega o ponteiro, não o conteúdo binário.
+
+Achado de modelagem: `documento.sta_editor` é `NOT NULL` no banco, mas sua
+correlação com interno/externo (`'2'`/`'0'`) pode refletir apenas "documento
+externo não tem editor", não um domínio de tipos de editor — por isso
+`Documento.editor` é campo obrigatório mas sem enum.
+
+#### O que a E2 ainda exige
+
+Autenticação e autorização por recurso do SIP, paginação e filtros completos do
+Controle de Processos, e baseline visual diferencial. A fixture transacional
+cobre a verificação de consulta, mas **não** substitui uma instalação
+autorizada com processo real para a comparação de tela.
 
 ### Entrega E2 — Primeira linha na tela
 

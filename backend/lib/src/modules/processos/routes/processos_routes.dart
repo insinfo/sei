@@ -26,4 +26,50 @@ void registrarRotasProcessos(
     processoDetalheController.andamentos,
     middleware: middlewares,
   );
+  app.get(
+    '/api/v1/processos/:${ProcessoDetalheController.idProcessoParam}/unidades-abertas',
+    processoDetalheController.unidadesAbertas,
+    middleware: middlewares,
+  );
+  app.get(
+    '/api/v1/processos/:${ProcessoDetalheController.idProcessoParam}/relacionados',
+    processoDetalheController.relacionados,
+    middleware: middlewares,
+  );
+  app.get(
+    '/api/v1/processos/:${ProcessoDetalheController.idProcessoParam}/participantes',
+    processoDetalheController.participantes,
+    middleware: middlewares,
+  );
+  app.get(
+    '/api/v1/processos/:${ProcessoDetalheController.idProcessoParam}/anotacoes',
+    processoDetalheController.anotacoes,
+    middleware: middlewares,
+  );
+  app.get(
+    '/api/v1/processos/:${ProcessoDetalheController.idProcessoParam}/marcadores',
+    processoDetalheController.marcadores,
+    middleware: middlewares,
+  );
+  app.get(
+    '/api/v1/processos/:${ProcessoDetalheController.idProcessoParam}/acompanhamentos',
+    processoDetalheController.acompanhamentos,
+    middleware: middlewares,
+  );
+  app.get(
+    '/api/v1/processos/:${ProcessoDetalheController.idProcessoParam}/controles-prazo',
+    processoDetalheController.controlesPrazo,
+    middleware: middlewares,
+  );
+  app.get(
+    '/api/v1/processos/:${ProcessoDetalheController.idProcessoParam}/retornos-programados',
+    processoDetalheController.retornosProgramados,
+    middleware: middlewares,
+  );
+  app.get(
+    '/api/v1/processos/:${ProcessoDetalheController.idProcessoParam}'
+    '/documentos/:${ProcessoDetalheController.idDocumentoParam}/conteudo',
+    processoDetalheController.conteudoDocumento,
+    middleware: middlewares,
+  );
 }

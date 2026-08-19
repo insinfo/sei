@@ -1,0 +1,21 @@
+PACOTE DE DOCUMENTAÇÃO DO SEI
+=============================
+
+Este ZIP preserva o caminho:
+
+  sei\backend\docs
+
+Para instalar no local solicitado:
+
+1. Extraia o ZIP diretamente em C:\MyDartProjects
+2. Confirme que o arquivo abaixo existe:
+
+   C:\MyDartProjects\sei\backend\docs\README.md
+
+A pasta sei\backend\docs\sei\assets deve ser mantida para que as imagens dos arquivos Markdown funcionem.
+
+Arquivos de entrada principais:
+- README.md
+- sei\INVENTARIO-CONSOLIDADO.md
+- sei\inventario-recursos-sei.csv
+- sei\inventario-recursos-sei.json

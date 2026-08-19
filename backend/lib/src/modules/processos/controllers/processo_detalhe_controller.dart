@@ -8,6 +8,8 @@ import 'package:sei_core/sei_core.dart';
 /// Expõe leituras paginadas do detalhe de processo para a interface SEI.
 class ProcessoDetalheController {
   static const String idProcessoParam = 'idProcesso';
+  static const String idDocumentoParam = 'idDocumento';
+  static const String _idUnidadeParam = 'idUnidade';
 
   Future<void> cabecalho(
     RequestContext request,
@@ -73,10 +75,189 @@ class ProcessoDetalheController {
     }
   }
 
+  Future<void> unidadesAbertas(
+    RequestContext request,
+    ResponseContext response,
+  ) async {
+    try {
+      final int idProcesso = _lerIdProcesso(request);
+      final ProcessoDetalheRepository repositorio =
+          request.make<ProcessoDetalheRepository>();
+      final List<ProcessoUnidadeAberta> unidades =
+          await repositorio.listarUnidadesAbertas(idProcesso);
+      await RespostaApiHttp.responderLista(response, unidades);
+    } on FormatException catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message);
+    } on ArgumentError catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message.toString());
+    }
+  }
+
+  Future<void> relacionados(
+    RequestContext request,
+    ResponseContext response,
+  ) async {
+    try {
+      final int idProcesso = _lerIdProcesso(request);
+      final ProcessoDetalheRepository repositorio =
+          request.make<ProcessoDetalheRepository>();
+      final List<ProcessoRelacionado> relacionados =
+          await repositorio.listarRelacionados(idProcesso);
+      await RespostaApiHttp.responderLista(response, relacionados);
+    } on FormatException catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message);
+    } on ArgumentError catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message.toString());
+    }
+  }
+
+  Future<void> participantes(
+    RequestContext request,
+    ResponseContext response,
+  ) async {
+    try {
+      final int idProcesso = _lerIdProcesso(request);
+      final ProcessoDetalheRepository repositorio =
+          request.make<ProcessoDetalheRepository>();
+      final List<ProcessoParticipante> participantes =
+          await repositorio.listarParticipantes(idProcesso);
+      await RespostaApiHttp.responderLista(response, participantes);
+    } on FormatException catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message);
+    } on ArgumentError catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message.toString());
+    }
+  }
+
+  Future<void> anotacoes(
+    RequestContext request,
+    ResponseContext response,
+  ) async {
+    try {
+      final int idProcesso = _lerIdProcesso(request);
+      final int idUnidade = _lerIdUnidade(request);
+      final ProcessoDetalheRepository repositorio =
+          request.make<ProcessoDetalheRepository>();
+      final List<ProcessoAnotacao> anotacoes =
+          await repositorio.listarAnotacoes(idProcesso, idUnidade);
+      await RespostaApiHttp.responderLista(response, anotacoes);
+    } on FormatException catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message);
+    } on ArgumentError catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message.toString());
+    }
+  }
+
+  Future<void> marcadores(
+    RequestContext request,
+    ResponseContext response,
+  ) async {
+    try {
+      final int idProcesso = _lerIdProcesso(request);
+      final ProcessoDetalheRepository repositorio =
+          request.make<ProcessoDetalheRepository>();
+      final List<ProcessoMarcador> marcadores =
+          await repositorio.listarMarcadores(idProcesso);
+      await RespostaApiHttp.responderLista(response, marcadores);
+    } on FormatException catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message);
+    } on ArgumentError catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message.toString());
+    }
+  }
+
+  Future<void> acompanhamentos(
+    RequestContext request,
+    ResponseContext response,
+  ) async {
+    try {
+      final int idProcesso = _lerIdProcesso(request);
+      final ProcessoDetalheRepository repositorio =
+          request.make<ProcessoDetalheRepository>();
+      final List<ProcessoAcompanhamento> acompanhamentos =
+          await repositorio.listarAcompanhamentos(idProcesso);
+      await RespostaApiHttp.responderLista(response, acompanhamentos);
+    } on FormatException catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message);
+    } on ArgumentError catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message.toString());
+    }
+  }
+
+  Future<void> controlesPrazo(
+    RequestContext request,
+    ResponseContext response,
+  ) async {
+    try {
+      final int idProcesso = _lerIdProcesso(request);
+      final int idUnidade = _lerIdUnidade(request);
+      final ProcessoDetalheRepository repositorio =
+          request.make<ProcessoDetalheRepository>();
+      final List<ProcessoControlePrazo> controles =
+          await repositorio.listarControlesPrazo(idProcesso, idUnidade);
+      await RespostaApiHttp.responderLista(response, controles);
+    } on FormatException catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message);
+    } on ArgumentError catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message.toString());
+    }
+  }
+
+  Future<void> retornosProgramados(
+    RequestContext request,
+    ResponseContext response,
+  ) async {
+    try {
+      final int idProcesso = _lerIdProcesso(request);
+      final ProcessoDetalheRepository repositorio =
+          request.make<ProcessoDetalheRepository>();
+      final List<ProcessoRetornoProgramado> retornos =
+          await repositorio.listarRetornosProgramados(idProcesso);
+      await RespostaApiHttp.responderLista(response, retornos);
+    } on FormatException catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message);
+    } on ArgumentError catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message.toString());
+    }
+  }
+
+  Future<void> conteudoDocumento(
+    RequestContext request,
+    ResponseContext response,
+  ) async {
+    try {
+      final int idProcesso = _lerIdProcesso(request);
+      final int idDocumento = ParametrosHttp.identificadorPositivo(
+        request.params[idDocumentoParam],
+        nomeCampo: idDocumentoParam,
+      );
+      final ProcessoDetalheRepository repositorio =
+          request.make<ProcessoDetalheRepository>();
+      final ProcessoDocumentoConteudo? conteudo =
+          await repositorio.obterConteudoDocumento(idProcesso, idDocumento);
+      if (conteudo == null) {
+        await _responderDocumentoNaoEncontrado(response);
+        return;
+      }
+      await response.json(conteudo.toMap());
+    } on FormatException catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message);
+    } on ArgumentError catch (erro) {
+      await _responderRequisicaoInvalida(response, erro.message.toString());
+    }
+  }
+
   int _lerIdProcesso(RequestContext request) {
     return ParametrosHttp.identificadorPositivo(
       request.params[idProcessoParam],
       nomeCampo: idProcessoParam,
+    );
+  }
+
+  int _lerIdUnidade(RequestContext request) {
+    return ParametrosHttp.identificadorPositivo(
+      request.queryParameters[_idUnidadeParam],
+      nomeCampo: _idUnidadeParam,
     );
   }
 
@@ -98,6 +279,16 @@ class ProcessoDetalheController {
       response,
       codigoHttp: 404,
       mensagem: 'Processo não encontrado.',
+    );
+  }
+
+  Future<void> _responderDocumentoNaoEncontrado(
+    ResponseContext response,
+  ) async {
+    await RespostaApiHttp.responderErro(
+      response,
+      codigoHttp: 404,
+      mensagem: 'Documento não encontrado.',
     );
   }
 }

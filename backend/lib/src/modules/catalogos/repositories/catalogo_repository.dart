@@ -91,4 +91,32 @@ class CatalogoRepository {
         .map((Map<String, dynamic> row) => Serie.fromMap(row))
         .toList(growable: false);
   }
+
+  /// Lista o catálogo de tarefas com as marcações de efeito sobre o processo.
+  ///
+  /// É este catálogo que define se um evento fecha os andamentos abertos da
+  /// unidade, se ele nasce concluído e se pode ocorrer com o processo já
+  /// concluído. Sem ele, nenhuma regra de conclusão, envio ou reabertura pode
+  /// ser reproduzida com fidelidade.
+  Future<List<TarefaCatalogo>> listarTarefas() async {
+    final rows = await _connection
+        .table(TarefaCatalogo.fqtn)
+        .select(const <String>[
+          TarefaCatalogo.idTarefaCol,
+          TarefaCatalogo.idTarefaModuloCol,
+          TarefaCatalogo.nomeCol,
+          TarefaCatalogo.historicoResumidoCol,
+          TarefaCatalogo.historicoCompletoCol,
+          TarefaCatalogo.fecharAndamentosAbertosCol,
+          TarefaCatalogo.lancarAndamentoFechadoCol,
+          TarefaCatalogo.permiteProcessoFechadoCol,
+          TarefaCatalogo.consultaProcessualCol,
+        ])
+        .orderBy(TarefaCatalogo.idTarefaCol, 'asc')
+        .get();
+
+    return rows
+        .map((Map<String, dynamic> row) => TarefaCatalogo.fromMap(row))
+        .toList(growable: false);
+  }
 }

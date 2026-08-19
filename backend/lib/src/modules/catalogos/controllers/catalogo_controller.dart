@@ -30,4 +30,11 @@ class CatalogoController {
 
     await RespostaApiHttp.responderLista(response, series);
   }
+
+  Future<void> tarefas(RequestContext request, ResponseContext response) async {
+    final CatalogoRepository repositorio = request.make<CatalogoRepository>();
+    final List<TarefaCatalogo> tarefas = await repositorio.listarTarefas();
+
+    await RespostaApiHttp.responderLista(response, tarefas);
+  }
 }

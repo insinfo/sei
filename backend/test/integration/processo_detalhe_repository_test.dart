@@ -38,6 +38,24 @@ void main() {
       expect(andamentos.proximoCursor, isNull);
     });
 
+    test('projecoes por unidade e vinculos ficam vazias sem dados', () async {
+      const idProcessoInexistente = 999999999;
+
+      final unidadesAbertas = await processoRepository.listarUnidadesAbertas(
+        idProcessoInexistente,
+      );
+      final relacionados = await processoRepository.listarRelacionados(
+        idProcessoInexistente,
+      );
+      final participantes = await processoRepository.listarParticipantes(
+        idProcessoInexistente,
+      );
+
+      expect(unidadesAbertas, isEmpty);
+      expect(relacionados, isEmpty);
+      expect(participantes, isEmpty);
+    });
+
     test('recusa cursor malformado antes de consultar a pagina', () async {
       await expectLater(
         processoRepository.listarDocumentos(
