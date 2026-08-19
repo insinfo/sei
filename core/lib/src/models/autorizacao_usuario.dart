@@ -5,13 +5,16 @@ import 'package:sei_core/src/utils/sei_core_utils.dart';
 
 /// Resolução de autorização do SIP para um usuário em uma unidade.
 ///
-/// **Isto não é autenticação.** A Base de Referência não guarda senha nem
-/// hash algum: `public.usuario` não tem nenhuma coluna de credencial, e
-/// `servidor_autenticacao` tem só 2 linhas reais, ambas `sta_tipo = 'AD'`
-/// (Active Directory), delegando a verificação de identidade a um LDAP/AD
-/// externo por órgão que não existe neste laboratório local. A fronteira
-/// entre os dois está registrada em
-/// `backend/docs/evidencias_processo_detalhe.md`.
+/// **Isto não é autenticação.** `sip_5_0_0.usuario` (autorização) não tem
+/// coluna de credencial, mas isso não significa que o SEI não tenha login
+/// local: `sei_5_0_0.usuario.senha` (60 chars, hash bcrypt) guarda a senha
+/// da aplicação, e a integração LDAP/AD (`servidor_autenticacao`) é uma
+/// opção por órgão sobre esse login local, não um substituto obrigatório —
+/// ver a correção registrada em
+/// `backend/docs/evidencias_processo_detalhe.md`. A fronteira de escopo
+/// continua a mesma: login real não foi implementado porque escreveria
+/// contra uma Base de Referência tratada como somente leitura, não porque a
+/// infraestrutura de autenticação seja inexistente.
 ///
 /// Este DTO resolve só a metade de autorização: dado um `idUsuario` e um
 /// `idUnidade` já conhecidos por outro mecanismo (o contexto de

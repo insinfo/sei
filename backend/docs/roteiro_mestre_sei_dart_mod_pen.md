@@ -3533,28 +3533,34 @@ Quinta rodada: a investigação do esquema de autenticação/autorização do SI
 ainda exige", chegou a uma descoberta que redesenha o que é possível
 implementar aqui e agora.
 
-**Achado principal: a Base de Referência não guarda senha nem hash algum.**
-`public.usuario` não tem nenhuma coluna de credencial —
-`id_usuario, id_orgao, id_origem, sigla, nome, sin_ativo, cpf,
+**Achado principal (corrigido em 19 de agosto de 2026 — ver seção logo
+abaixo de "Entrega E2"): `sip_5_0_0.usuario` não guarda senha nem hash.**
+`public.usuario` (do banco `sip_5_0_0`) não tem nenhuma coluna de
+credencial — `id_usuario, id_orgao, id_origem, sigla, nome, sin_ativo, cpf,
 nome_registro_civil, nome_social, email, sin_bloqueado, dth_pausa_2fa` é o
 esquema inteiro. `servidor_autenticacao` tem só **2 linhas reais**, ambas
 `sta_tipo = 'AD'` (Active Directory), porta `389`, endereço
 `hostnamedoservidor.dominio.gov.br` — um placeholder de instalador, não um
 servidor real —, e `rel_orgao_autenticacao` liga cada órgão a um desses dois
-servidores. Ou seja: o SEI real terceiriza toda verificação de identidade a
-um LDAP/AD externo por órgão, e esse LDAP/AD **não existe neste laboratório
-local**. Não é possível, nem seria fiel ao produto real, implementar "login
-com senha e hash" contra este esquema — seria inventar um mecanismo que a
-própria Base de Referência não usa. Essa descoberta está registrada com o
-esquema completo em `backend/docs/evidencias_processo_detalhe.md`.
+servidores. **A conclusão que a versão original desta seção tirava daqui —
+que "o SEI real terceiriza toda verificação de identidade a um LDAP/AD
+externo por órgão" — estava errada por evidência incompleta**: essa tabela é
+de autorização do SIP, não de login do SEI; `sei_5_0_0.usuario` (a
+aplicação, banco diferente) tem coluna própria `senha character(60)`
+(hash bcrypt), e a integração LDAP/AD é opcional por órgão, não obrigatória.
+Detalhe completo, com fonte pública, na seção "correção: autenticação do
+SEI não depende de LDAP/AD" logo após "O que a E2 ainda exige" abaixo, e em
+`backend/docs/evidencias_processo_detalhe.md`.
 
-**A barreira de autenticação real da E2 continua de pé.** Login, sessão,
-troca de unidade ativa e o adaptador LDAP/AD (ou SSO gov.br) descrito na
-seção 6.4 seguem sem solução — essa é uma decisão de arquitetura que não foi
-tomada nesta rodada, e nenhuma tentativa de senha, hash ou sessão foi feita
-aqui. O que mudou é que a frase "Autenticação e autorização por recurso do
-SIP", citada como um único bloco pendente, na verdade descrevia dois
-requisitos independentes — e só um deles depende do LDAP inexistente.
+**A barreira de autenticação real da E2 continua de pé — mas por escopo, não por impossibilidade técnica.** Login, sessão e troca de
+unidade ativa contra `sei_5_0_0.usuario.senha` seguem sem solução — essa é
+uma decisão de arquitetura que não foi tomada nesta rodada (e implementar
+login real escreveria contra uma Base de Referência tratada como somente
+leitura), e nenhuma tentativa de senha, hash ou sessão foi feita aqui. O que
+mudou é que a frase "Autenticação e autorização por recurso do SIP", citada
+como um único bloco pendente, na verdade descrevia dois requisitos
+independentes — e nenhum dos dois depende de LDAP/AD externo, que é opcional
+e não a causa da pendência.
 
 **O que foi resolvido é a outra metade: autorização por recurso.** Dado um
 `id_usuario` e um `id_unidade` já conhecidos por outro mecanismo (hoje, o
@@ -3584,12 +3590,55 @@ ponta a ponta).
 
 #### O que a E2 ainda exige
 
-Autenticação do SIP — login, sessão e adaptador LDAP/AD real ou SSO gov.br,
-ainda sem solução —, paginação e filtros completos do Controle de Processos,
-e baseline visual diferencial. A autorização por recurso do SIP, citada
-anteriormente junto com autenticação, já está resolvida (ver acima). A
-fixture transacional cobre a verificação de consulta, mas **não** substitui
-uma instalação autorizada com processo real para a comparação de tela.
+Autenticação (login local por usuário e senha do SEI, sessão, troca de
+unidade ativa — ver correção abaixo), paginação e filtros completos do
+Controle de Processos, e baseline visual diferencial. A autorização por
+recurso do SIP, citada anteriormente junto com autenticação, já está
+resolvida (ver acima). A fixture transacional cobre a verificação de
+consulta, mas **não** substitui uma instalação autorizada com processo real
+para a comparação de tela.
+
+### Estado de execução local em 19 de agosto de 2026 — correção: autenticação do SEI não depende de LDAP/AD
+
+O usuário questionou a conclusão da seção anterior ("o SEI real delega toda
+verificação de identidade a um LDAP/AD externo por órgão, que não existe
+neste laboratório local") e pediu verificação externa. A conclusão estava
+errada por evidência incompleta: a investigação olhou só
+`sip_5_0_0.usuario` (autorização — perfil/permissão por unidade), viu que
+não tinha coluna de credencial e generalizou para "o SEI não guarda senha em
+lugar nenhum", sem checar `sei_5_0_0.usuario` (a aplicação em si).
+
+Reinspecionando `sei_5_0_0.usuario` diretamente: a tabela tem coluna própria
+`senha character(60)` — 60 caracteres é o tamanho exato de um hash bcrypt
+(`$2y$10$...`), o formato padrão de `password_hash()` do PHP, linguagem em
+que o SEI é escrito. Ou seja, a Base de Referência **tem**, sim, um
+mecanismo de login local por usuário e senha, só que na tabela errada (do
+banco errado) para a investigação original ter encontrado. O manual público
+de instalação do SEI ("6. Integração LDAP/AD",
+`softwarepublico.gov.br/social/sei/manuais/manual-de-instalacao`) confirma
+que a integração com LDAP/AD é **opcional** — "o SIP permite integração com
+OpenLDAP e/ou ActiveDirectory" —, tentada na ordem da lista configurada até
+um servidor responder, e o próprio roteiro de configuração pede login prévio
+"com o usuário e senha teste". As 2 linhas de `servidor_autenticacao`
+(`sta_tipo = 'AD'`, nome `Exemplo_Conexao_AD_1/2`, endereço
+`hostnamedoservidor.dominio.gov.br`) são exemplos deixados pelo instalador
+de referência, não prova de dependência obrigatória. Isso também confirma o
+que o manual do usuário já lido nesta base (`Iniciando_operacoes.html`)
+já dizia e que não tinha sido cruzado com a conclusão anterior: "informar
+seu login, senha e – no caso de instalações multiórgão – o órgão ao qual
+está vinculado."
+
+**O que muda:** a caracterização de "autenticação depende de infraestrutura
+externa que não existe" está corrigida para "autenticação é um mecanismo
+próprio do SEI (usuário e senha local, hash em `sei_5_0_0.usuario.senha`),
+com LDAP/AD como integração opcional por órgão". **O que não muda:** a
+fronteira de escopo desta rodada — `sei_5_0_0` continua tratado como Base de
+Referência somente leitura, e implementar login real contra a coluna `senha`
+seria escrever contra um banco que este projeto não deve alterar, então
+autenticação continua pendente da E2, agora por decisão de escopo, não por
+impossibilidade técnica. `backend/docs/evidencias_processo_detalhe.md` e o
+Dartdoc de `AutorizacaoUsuario`/`SipReferenciaRepository` foram corrigidos
+junto com esta seção.
 
 ### Entrega E2 — Primeira linha na tela
 

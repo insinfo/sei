@@ -3,13 +3,17 @@ import 'package:sei_core/sei_core.dart';
 
 /// Consulta cadastros públicos de referência do SIP e resolve autorização.
 ///
-/// **Não trata autenticação.** A Base de Referência não guarda senha nem
-/// hash de usuário algum: a verificação de identidade é delegada a um
-/// LDAP/AD externo por órgão (`servidor_autenticacao.sta_tipo = 'AD'`), que
-/// não existe neste laboratório local. Este repositório recebe `idUsuario` e
-/// `idUnidade` já resolvidos por outro mecanismo e responde só a metade de
-/// autorização: quais perfis estão vigentes e quais recursos eles liberam.
-/// Ver `AutorizacaoUsuario` e `backend/docs/evidencias_processo_detalhe.md`.
+/// **Não trata autenticação.** O SEI tem login local próprio
+/// (`sei_5_0_0.usuario.senha`, hash bcrypt), com LDAP/AD
+/// (`servidor_autenticacao`) como integração opcional por órgão — não é
+/// dependência obrigatória nem infraestrutura inexistente; ver a correção em
+/// `backend/docs/evidencias_processo_detalhe.md`. Login real não foi
+/// implementado aqui porque escreveria contra uma Base de Referência
+/// tratada como somente leitura, por decisão de escopo desta rodada. Este
+/// repositório recebe `idUsuario` e `idUnidade` já resolvidos por outro
+/// mecanismo e responde só a metade de autorização: quais perfis estão
+/// vigentes e quais recursos eles liberam. Ver `AutorizacaoUsuario` e
+/// `backend/docs/evidencias_processo_detalhe.md`.
 class SipReferenciaRepository {
   SipReferenciaRepository(this._connection);
 

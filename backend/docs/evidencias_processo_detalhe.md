@@ -304,7 +304,7 @@ controle de prazo interno e um retorno programado ainda não cumprido. O
 último teste de cada arquivo confere que, encerrada a transação, a Base de
 Referência volta exatamente ao estado anterior.
 
-## SIP — a Base de Referência não guarda senha, delega a LDAP/AD
+## SIP — autorização por recurso, e a correção sobre autenticação
 
 Investigação do esquema de autenticação/autorização do SIP (`sip_5_0_0`),
 motivada pelo requisito "Autenticação e autorização por recurso do SIP"
@@ -312,28 +312,49 @@ citado como pendência da Entrega E2 em `roteiro_mestre_sei_dart_mod_pen.md`.
 A conclusão delimita a fronteira entre o que é possível implementar contra a
 Base de Referência local e o que depende de infraestrutura externa.
 
-**Não há senha nem hash em lugar nenhum.** `public.usuario` tem
-`id_usuario, id_orgao, id_origem, sigla, nome, sin_ativo, cpf,
-nome_registro_civil, nome_social, email, sin_bloqueado, dth_pausa_2fa` — sem
-nenhuma coluna de credencial. A tabela `servidor_autenticacao` tem
-exatamente **2 linhas reais** na Base de Referência, ambas com
-`sta_tipo = 'AD'` (Active Directory), porta `389` e endereço
-`hostnamedoservidor.dominio.gov.br` — claramente um valor de exemplo do
-instalador, não um servidor real. `rel_orgao_autenticacao` liga cada órgão a
-um desses dois servidores. Isso confirma que o SEI real delega toda
-verificação de identidade a um LDAP/AD externo por órgão, que **não existe
-neste laboratório local** e cuja simulação não foi tentada — implementar
-"login com senha e hash" contra este esquema seria inventar um mecanismo que
-a própria Base de Referência não usa.
+**Correção de um erro deste documento.** A primeira versão desta seção
+concluía que "o SEI real delega toda verificação de identidade a um LDAP/AD
+externo por órgão", com base em `sip_5_0_0.usuario` não ter nenhuma coluna
+de credencial (`id_usuario, id_orgao, id_origem, sigla, nome, sin_ativo,
+cpf, nome_registro_civil, nome_social, email, sin_bloqueado,
+dth_pausa_2fa`) e em `servidor_autenticacao` ter 2 linhas de exemplo com
+`sta_tipo = 'AD'`. Isso foi longe demais: `sip_5_0_0.usuario` é a tabela de
+**autorização** do SIP (concede perfil/permissão por unidade), não a tabela
+de login do SEI — não ter senha ali não significa que o SEI não tenha senha
+em lugar nenhum. `sei_5_0_0.usuario` (o banco da aplicação, não o do SIP)
+tem coluna própria `senha character(60)` — 60 caracteres é exatamente o
+tamanho de um hash bcrypt (`$2y$10$...`), o formato que `password_hash()` do
+PHP produz por padrão, consistente com o SEI ser escrito em PHP. O manual
+público de instalação do SEI ("6. Integração LDAP/AD",
+softwarepublico.gov.br) confirma que a integração é **opcional** — "o SIP
+permite integração com OpenLDAP e/ou ActiveDirectory" — e que, quando vários
+servidores estão configurados, a tentativa segue a ordem da lista até um
+funcionar; o próprio roteiro de configuração do LDAP pede para logar antes
+"com o usuário e senha teste", ou seja, login local por usuário e senha é o
+mecanismo padrão/de base, e LDAP/AD é uma integração por órgão sobre ele, não
+um substituto obrigatório. Isso também bate com o manual do usuário já lido
+nesta base (`Iniciando_operacoes.html`): "informar seu login, senha e – no
+caso de instalações multiórgão – o órgão ao qual está vinculado". As 2 linhas
+de `servidor_autenticacao` com `sta_tipo = 'AD'`, endereço
+`hostnamedoservidor.dominio.gov.br` e nome `Exemplo_Conexao_AD_1/2` são
+exemplos deixados pelo instalador de referência, não prova de que AD seja
+obrigatório.
 
-**Fronteira de escopo.** Autenticação (validar credencial, abrir sessão,
-trocar unidade ativa) continua fora de escopo e depende de uma decisão de
-arquitetura (adaptador LDAP/AD real, ou SSO gov.br) que não foi tomada nesta
-rodada. O que **é** implementável e testável com dado real, sem LDAP nenhum,
-é a metade de **autorização**: dado um `id_usuario` e um `id_unidade` já
-resolvidos por outro mecanismo (hoje, o contexto de desenvolvimento não
-autenticado do projeto), resolver quais perfis estão vigentes e quais
-recursos (telas/ações) esses perfis liberam. É isso que
+**Fronteira de escopo, sem mudar.** A conclusão errada não muda a decisão
+prática desta rodada: autenticação (validar credencial, abrir sessão, trocar
+unidade ativa) continua fora de escopo aqui, porque `sei_5_0_0` é tratado
+como Base de Referência somente leitura neste projeto e a coluna `senha` não
+foi — e não deve ser — usada para implementar login contra ela. A correção é
+sobre a **razão**: não é porque o SEI real dependa de LDAP/AD externo
+inexistente neste laboratório, é porque autenticação de fato é um mecanismo
+próprio do SEI (`sei_5_0_0.usuario.senha`, hash local, com LDAP/AD como
+integração opcional por órgão) que está fora do escopo desta rodada por
+decisão de projeto, não por impossibilidade técnica. O que **é** implementável
+e testável com dado real, sem depender de login algum, é a metade de
+**autorização**: dado um `id_usuario` e um `id_unidade` já resolvidos por
+outro mecanismo (hoje, o contexto de desenvolvimento não autenticado do
+projeto), resolver quais perfis estão vigentes e quais recursos
+(telas/ações) esses perfis liberam. É isso que
 `SipReferenciaRepository.resolverAutorizacao` faz.
 
 **Esquema usado, confirmado por `\d` direto no banco:**
