@@ -12,4 +12,10 @@ void registrarRotasSipReferencia(
     controller.sistemas,
     middleware: <RequestHandler>[middlewareConexao],
   );
+  app.get(
+    '/api/v1/sip/usuarios/:${SipReferenciaController.idUsuarioParam}'
+    '/autorizacao',
+    controller.autorizacao,
+    middleware: <RequestHandler>[middlewareConexao],
+  );
 }

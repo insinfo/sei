@@ -304,6 +304,92 @@ controle de prazo interno e um retorno programado ainda não cumprido. O
 último teste de cada arquivo confere que, encerrada a transação, a Base de
 Referência volta exatamente ao estado anterior.
 
+## SIP — a Base de Referência não guarda senha, delega a LDAP/AD
+
+Investigação do esquema de autenticação/autorização do SIP (`sip_5_0_0`),
+motivada pelo requisito "Autenticação e autorização por recurso do SIP"
+citado como pendência da Entrega E2 em `roteiro_mestre_sei_dart_mod_pen.md`.
+A conclusão delimita a fronteira entre o que é possível implementar contra a
+Base de Referência local e o que depende de infraestrutura externa.
+
+**Não há senha nem hash em lugar nenhum.** `public.usuario` tem
+`id_usuario, id_orgao, id_origem, sigla, nome, sin_ativo, cpf,
+nome_registro_civil, nome_social, email, sin_bloqueado, dth_pausa_2fa` — sem
+nenhuma coluna de credencial. A tabela `servidor_autenticacao` tem
+exatamente **2 linhas reais** na Base de Referência, ambas com
+`sta_tipo = 'AD'` (Active Directory), porta `389` e endereço
+`hostnamedoservidor.dominio.gov.br` — claramente um valor de exemplo do
+instalador, não um servidor real. `rel_orgao_autenticacao` liga cada órgão a
+um desses dois servidores. Isso confirma que o SEI real delega toda
+verificação de identidade a um LDAP/AD externo por órgão, que **não existe
+neste laboratório local** e cuja simulação não foi tentada — implementar
+"login com senha e hash" contra este esquema seria inventar um mecanismo que
+a própria Base de Referência não usa.
+
+**Fronteira de escopo.** Autenticação (validar credencial, abrir sessão,
+trocar unidade ativa) continua fora de escopo e depende de uma decisão de
+arquitetura (adaptador LDAP/AD real, ou SSO gov.br) que não foi tomada nesta
+rodada. O que **é** implementável e testável com dado real, sem LDAP nenhum,
+é a metade de **autorização**: dado um `id_usuario` e um `id_unidade` já
+resolvidos por outro mecanismo (hoje, o contexto de desenvolvimento não
+autenticado do projeto), resolver quais perfis estão vigentes e quais
+recursos (telas/ações) esses perfis liberam. É isso que
+`SipReferenciaRepository.resolverAutorizacao` faz.
+
+**Esquema usado, confirmado por `\d` direto no banco:**
+
+- `permissao(id_perfil, id_sistema, id_usuario, id_unidade,
+  id_tipo_permissao, dta_inicio, dta_fim, sin_subunidades)`, PK composta
+  `(id_perfil, id_sistema, id_unidade, id_usuario)`. **8 linhas reais** na
+  Base de Referência, todas para `id_usuario = 100000001` e
+  `id_unidade = 110000000` (o órgão raiz), `dta_fim` sempre nulo (sem
+  expiração) e `sin_subunidades` sempre `'N'`. Das 8, 3 são do sistema SIP
+  (`id_sistema = 100000099`) e 5 do sistema SEI (`id_sistema = 100000100`).
+- `tipo_permissao(id_tipo_permissao, descricao)` — catálogo de 3 linhas com a
+  própria `descricao` documentando o significado (`1 = Não Delegável`,
+  `2 = Delegável`, `3 = Delegável uma vez`), diferente dos códigos de uma
+  letra do restante deste documento. Como o banco documenta o domínio na
+  própria coluna, foi declarado `TipoPermissao` com confiança total, sem
+  lacuna. As 8 linhas reais de `permissao` usam sempre `id_tipo_permissao = 1`.
+- `perfil(id_perfil, id_sistema, nome, descricao, sin_coordenado, sin_ativo,
+  sin_2_fatores)`, PK composta `(id_perfil, id_sistema)` — o mesmo número de
+  perfil pode existir em mais de um sistema com significado independente.
+- `recurso(id_sistema, id_recurso, nome, descricao, caminho, sin_ativo)`, PK
+  composta `(id_recurso, id_sistema)`. **1.578 linhas** na Base de
+  Referência: 234 do sistema SIP e 1.344 do sistema SEI. `caminho` guarda o
+  identificador funcional usado pela tela para checar acesso (ex.:
+  `controlador.php?acao=sistema_cadastrar`), herdado do SEI em PHP.
+- `rel_perfil_recurso(id_perfil, id_sistema, id_recurso)` — vínculo N:N entre
+  perfil e recurso, PK composta pelas 3 colunas. **2.790 linhas** na Base de
+  Referência. Não tem DTO de catálogo próprio: é usada só como ponte no
+  `join` que resolve recursos liberados.
+
+**Resultado para o único usuário com permissão real na Base de Referência**
+(`id_usuario = 100000001`, `id_unidade = 110000000`, o órgão raiz): 8 perfis
+vigentes e **1.544 recursos distintos** liberados por eles, combinando os
+dois sistemas (recursos podem se repetir entre perfis do mesmo sistema, daí
+a deduplicação por `DISTINCT` na consulta). Filtrando só pelo sistema SEI
+(`id_sistema = 100000100`), restam 5 perfis e 1.314 recursos. Nenhuma outra
+unidade da Base de Referência tem linha em `permissao`.
+
+**"Vigente" é a janela de tempo, não o `sin_ativo` do catálogo.** Um perfil
+está vigente quando `dta_inicio <= agora` e (`dta_fim IS NULL` ou
+`dta_fim >= agora`). Isso é independente do `perfil.sin_ativo` do cadastro —
+os dois campos não têm relação entre si, por isso `PerfilAtivo.perfil.ativo`
+preserva o `sin_ativo` bruto sem usá-lo para filtrar a vigência. Como as 8
+linhas reais foram gravadas em 2016 sem `dta_fim`, a janela está sempre
+aberta nos dados de teste, mas a regra foi implementada com a comparação
+completa (não apenas "sem `dta_fim`"), usando `LOCALTIMESTAMP` do próprio
+banco para a comparação, e não o relógio do processo Dart.
+
+Implementado em `PerfilSip`, `RecursoSip`, `PerfilAtivo`, `AutorizacaoUsuario`
+e `TipoPermissao` (core), com leitura em
+`SipReferenciaRepository.resolverAutorizacao` e exposição em
+`GET /api/v1/sip/usuarios/:idUsuario/autorizacao`. Sem N+1: as duas consultas
+(perfis, recursos) são únicas cada uma, com `join` direto entre as tabelas
+acima — nenhuma delas é grande o suficiente para exigir análise adicional de
+índice (a maior, `rel_perfil_recurso`, tem 2.790 linhas).
+
 ## Lacunas que permanecem
 
 - **Condição canônica de sobrestado.** O manual afirma que processos

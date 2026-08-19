@@ -1,0 +1,19 @@
+// O cartão (.secao-detalhe) e os textos de estado são estilo compartilhado —
+// ver o comentário correspondente em `frontend/web/style.scss`. Este arquivo
+// guarda só o que é exclusivo da exibição de conteúdo de documento.
+:host {
+  display: block;
+}
+
+.documento-html {
+  padding: 1rem;
+  margin-top: 1rem;
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid #eef2f7;
+  border-radius: 0.25rem;
+}
+
+.documento-externo p {
+  margin: 0.3rem 0;
+}

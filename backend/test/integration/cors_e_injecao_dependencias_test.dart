@@ -65,5 +65,31 @@ void main() {
       expect(resposta.headers['access-control-allow-origin'], '*');
       expect(sistemas, hasLength(2));
     });
+
+    test('rota de autorizacao sip resolve perfis e recursos pelo http',
+        () async {
+      final http.Response resposta = await client.get(
+        Uri.parse(
+          '/api/v1/sip/usuarios/100000001/autorizacao?idUnidade=110000000',
+        ),
+      );
+      final Map<String, dynamic> corpo =
+          jsonDecode(resposta.body) as Map<String, dynamic>;
+
+      expect(resposta.statusCode, 200);
+      expect(corpo['id_usuario'], 100000001);
+      expect(corpo['id_unidade'], 110000000);
+      expect(corpo['perfis'], hasLength(8));
+      expect(corpo['recursos'], hasLength(1544));
+    });
+
+    test('rota de autorizacao sip exige idUnidade e responde 400 sem ela',
+        () async {
+      final http.Response resposta = await client.get(
+        Uri.parse('/api/v1/sip/usuarios/100000001/autorizacao'),
+      );
+
+      expect(resposta.statusCode, 400);
+    });
   });
 }

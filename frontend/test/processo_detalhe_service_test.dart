@@ -58,6 +58,29 @@ void main() {
     expect(andamentos.itens.single.idProcesso, idProcesso);
   });
 
+  test('carrega blocos e bases de conhecimento', () async {
+    const String idProcesso = '100000001';
+    final MockClient cliente = MockClient((http.Request requisicao) async {
+      switch (requisicao.url.path) {
+        case '/api/v1/processos/$idProcesso/blocos':
+          return _resposta(_blocos());
+        case '/api/v1/processos/$idProcesso/bases-conhecimento':
+          return _resposta(_basesConhecimento());
+      }
+      return http.Response('Não encontrado', 404);
+    });
+    final ProcessoDetalheService servico = _criarServico(cliente);
+
+    final List<ProcessoBloco> blocos = await servico.listarBlocos(idProcesso);
+    final List<ProcessoBaseConhecimento> bases =
+        await servico.listarBasesConhecimento(idProcesso);
+
+    expect(blocos.single.tipo, TipoBloco.assinatura);
+    expect(blocos.single.estado, EstadoBloco.disponibilizado);
+    expect(bases.single.descricao, 'Base de teste');
+    expect(bases.single.dataLiberacao, isNull);
+  });
+
   test('informa resposta 404', () async {
     final ProcessoDetalheService servico = _criarServico(
       MockClient(
@@ -202,4 +225,37 @@ Map<String, dynamic> _andamentos(String idProcesso) {
     limite: 50,
     proximoCursor: null,
   ).toMap();
+}
+
+List<Map<String, dynamic>> _blocos() {
+  return <Map<String, dynamic>>[
+    ProcessoBloco(
+      idBloco: 1,
+      tipo: TipoBloco.assinatura,
+      estado: EstadoBloco.disponibilizado,
+      descricao: 'Bloco de teste',
+      idUnidade: 110000001,
+      unidadeSigla: 'TESTE',
+      idUsuario: 1,
+      usuarioNome: 'Usuário de Teste',
+      sequencia: 1,
+      anotacao: null,
+    ).toMap(),
+  ];
+}
+
+List<Map<String, dynamic>> _basesConhecimento() {
+  return <Map<String, dynamic>>[
+    ProcessoBaseConhecimento(
+      idBaseConhecimento: 1,
+      descricao: 'Base de teste',
+      estado: 'D',
+      documento: 'G',
+      dataGeracao: DateTime(2026, 8, 5, 10),
+      idUnidade: 110000001,
+      unidadeSigla: 'TESTE',
+      idUsuarioGerador: 1,
+      usuarioGeradorNome: 'Usuário de Teste',
+    ).toMap(),
+  ];
 }

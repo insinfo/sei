@@ -1,0 +1,37 @@
+<section class="secao-detalhe">
+  <header>
+    <div>
+      <h3>Blocos</h3>
+      <p>Blocos de Assinatura, Reunião ou Interno que contêm este processo.</p>
+    </div>
+  </header>
+
+  <p class="carregando" *ngIf="carregando">Carregando blocos...</p>
+  <p class="erro-simples" *ngIf="mensagemErro.isNotEmpty" role="alert">{{ mensagemErro }}</p>
+  <p class="vazio" *ngIf="carregado && blocos.isEmpty && !carregando">Este processo não está em nenhum bloco.</p>
+
+  <div class="tabela-rolagem" *ngIf="blocos.isNotEmpty">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Tipo</th>
+          <th scope="col">Estado</th>
+          <th scope="col">Descrição</th>
+          <th scope="col">Unidade</th>
+          <th scope="col">Usuário</th>
+          <th scope="col">Anotação</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of blocos">
+          <td>{{ item.tipo.rotulo }}</td>
+          <td>{{ item.estado.rotulo }}</td>
+          <td>{{ item.descricao ?? '—' }}</td>
+          <td>{{ item.unidadeSigla }}</td>
+          <td>{{ item.usuarioNome }}</td>
+          <td>{{ item.anotacao ?? '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

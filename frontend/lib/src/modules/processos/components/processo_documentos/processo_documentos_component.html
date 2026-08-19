@@ -19,14 +19,16 @@
           <th scope="col">Tipo</th>
           <th scope="col">Unidade</th>
           <th scope="col">Situação</th>
+          <th scope="col">Ações</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let item of documentos">
+        <tr *ngFor="let item of documentos" [class.linha-selecionada]="item.idDocumento == idDocumentoSelecionado">
           <td>{{ item.nomeArvore ?? item.protocoloFormatado }}</td>
           <td>{{ item.serieNome }}</td>
           <td>{{ item.unidadeResponsavelSigla }}</td>
           <td>{{ item.estadoDocumento }}</td>
+          <td><button type="button" (click)="selecionarDocumento(item)">Ver conteúdo</button></td>
         </tr>
       </tbody>
     </table>

@@ -9,6 +9,7 @@ environment:
 dependencies:
   http: ^1.6.0
   ngdart: 8.0.0-dev.4
+  ngrouter: 4.0.0-dev.3
   sei_core:
     path: ../core
 

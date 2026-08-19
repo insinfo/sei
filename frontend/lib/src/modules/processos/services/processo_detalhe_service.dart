@@ -35,6 +35,8 @@ class ProcessoDetalheService {
   static const String _acompanhamentosPath = 'acompanhamentos';
   static const String _controlesPrazoPath = 'controles-prazo';
   static const String _retornosProgramadosPath = 'retornos-programados';
+  static const String _blocosPath = 'blocos';
+  static const String _basesConhecimentoPath = 'bases-conhecimento';
   static const String _conteudoPath = 'conteudo';
   static const String _idUnidadeParametro = 'idUnidade';
 
@@ -173,6 +175,34 @@ class ProcessoDetalheService {
       idProcesso: idProcesso,
       recurso: _retornosProgramadosPath,
       converter: ProcessoRetornoProgramado.fromMap,
+    );
+  }
+
+  /// Lista os blocos (Assinatura, Reunião ou Interno) que contêm este
+  /// processo.
+  ///
+  /// Como `rel_bloco_protocolo.id_protocolo` é genérico, o mesmo recurso
+  /// também serve para documento; aqui é usado apenas com [idProcesso].
+  Future<List<ProcessoBloco>> listarBlocos(String idProcesso) {
+    return _buscarLista(
+      idProcesso: idProcesso,
+      recurso: _blocosPath,
+      converter: ProcessoBloco.fromMap,
+    );
+  }
+
+  /// Lista as bases de conhecimento associadas ao **tipo** deste processo.
+  ///
+  /// A associação do SEI é por tipo de processo, não pelo processo em si —
+  /// por isso a mesma base pode aparecer para vários processos do mesmo
+  /// tipo, reproduzindo o ícone "B" que o SEI mostra nesse caso.
+  Future<List<ProcessoBaseConhecimento>> listarBasesConhecimento(
+    String idProcesso,
+  ) {
+    return _buscarLista(
+      idProcesso: idProcesso,
+      recurso: _basesConhecimentoPath,
+      converter: ProcessoBaseConhecimento.fromMap,
     );
   }
 

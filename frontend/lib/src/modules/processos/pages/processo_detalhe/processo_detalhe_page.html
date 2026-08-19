@@ -14,7 +14,8 @@
 
   <ng-container *ngIf="cabecalho != null">
     <sei-processo-unidades-abertas [idProcesso]="idProcesso"></sei-processo-unidades-abertas>
-    <sei-processo-documentos [idProcesso]="idProcesso"></sei-processo-documentos>
+    <sei-processo-documentos [idProcesso]="idProcesso" (documentoSelecionado)="selecionarDocumento($event)"></sei-processo-documentos>
+    <sei-processo-documento-conteudo [idProcesso]="idProcesso" [idDocumento]="idDocumentoSelecionado"></sei-processo-documento-conteudo>
     <sei-processo-andamentos [idProcesso]="idProcesso"></sei-processo-andamentos>
     <sei-processo-relacionados [idProcesso]="idProcesso"></sei-processo-relacionados>
     <sei-processo-participantes [idProcesso]="idProcesso"></sei-processo-participantes>
@@ -23,5 +24,7 @@
     <sei-processo-controles-prazo [idProcesso]="idProcesso" [idUnidade]="idUnidade"></sei-processo-controles-prazo>
     <sei-processo-anotacoes [idProcesso]="idProcesso" [idUnidade]="idUnidade"></sei-processo-anotacoes>
     <sei-processo-retornos-programados [idProcesso]="idProcesso"></sei-processo-retornos-programados>
+    <sei-processo-blocos [idProcesso]="idProcesso"></sei-processo-blocos>
+    <sei-processo-bases-conhecimento [idProcesso]="idProcesso"></sei-processo-bases-conhecimento>
   </ng-container>
 </section>

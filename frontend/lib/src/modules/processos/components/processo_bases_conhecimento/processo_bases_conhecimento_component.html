@@ -1,0 +1,37 @@
+<section class="secao-detalhe">
+  <header>
+    <div>
+      <h3>Bases de conhecimento</h3>
+      <p>Bases de conhecimento associadas ao tipo deste processo.</p>
+    </div>
+  </header>
+
+  <p class="carregando" *ngIf="carregando">Carregando bases de conhecimento...</p>
+  <p class="erro-simples" *ngIf="mensagemErro.isNotEmpty" role="alert">{{ mensagemErro }}</p>
+  <p class="vazio" *ngIf="carregado && bases.isEmpty && !carregando">Não há bases de conhecimento associadas ao tipo deste processo.</p>
+
+  <div class="tabela-rolagem" *ngIf="bases.isNotEmpty">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Descrição</th>
+          <th scope="col">Unidade</th>
+          <th scope="col">Gerada por</th>
+          <th scope="col">Gerada em</th>
+          <th scope="col">Liberada em</th>
+          <th scope="col">Conteúdo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of bases">
+          <td>{{ item.descricao }}</td>
+          <td>{{ item.unidadeSigla }}</td>
+          <td>{{ item.usuarioGeradorNome }}</td>
+          <td>{{ item.dataGeracao }}</td>
+          <td>{{ item.dataLiberacao ?? 'Não liberada' }}</td>
+          <td>Sem conteúdo disponível nesta listagem</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

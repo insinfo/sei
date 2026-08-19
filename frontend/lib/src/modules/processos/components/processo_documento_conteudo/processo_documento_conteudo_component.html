@@ -1,0 +1,24 @@
+<section class="secao-detalhe secao-documento-conteudo">
+  <header>
+    <div>
+      <h3>Conteúdo do documento</h3>
+      <p>Corpo do documento selecionado na árvore de documentos.</p>
+    </div>
+  </header>
+
+  <p class="vazio" *ngIf="idDocumento.isEmpty">Selecione um documento na árvore de documentos para ver o conteúdo.</p>
+  <p class="carregando" *ngIf="carregando">Carregando conteúdo do documento...</p>
+  <p class="erro-simples" *ngIf="mensagemErro.isNotEmpty" role="alert">{{ mensagemErro }}</p>
+
+  <div class="documento-interno" *ngIf="carregado && documentoInterno">
+    <div class="documento-html" *ngIf="possuiConteudoHtml" [innerHtml]="conteudoHtmlExibicao"></div>
+    <p class="vazio" *ngIf="!possuiConteudoHtml">Este documento não tem corpo HTML disponível.</p>
+  </div>
+
+  <div class="documento-externo" *ngIf="carregado && documentoExterno">
+    <p><strong>Arquivo:</strong> {{ documento?.anexoNome ?? '—' }}</p>
+    <p><strong>Tamanho:</strong> {{ anexoTamanhoFormatado }}</p>
+    <p><strong>Incluído em:</strong> {{ documento?.anexoDataInclusao ?? '—' }}</p>
+    <p class="erro-simples">O download deste anexo ainda não está disponível: o repositório de arquivos do SEI (SeiFileRepository) ainda não foi implementado no backend.</p>
+  </div>
+</section>

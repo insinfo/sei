@@ -1,4 +1,4 @@
-import 'dart:async' show unawaited;
+import 'dart:async' show StreamController, unawaited;
 
 import 'package:ngdart/angular.dart';
 import 'package:sei_core/sei_core.dart';
@@ -19,9 +19,18 @@ class ProcessoDocumentosComponent implements AfterChanges, OnDestroy {
   ProcessoDocumentosComponent(this._service);
 
   final ProcessoDetalheService _service;
+  final StreamController<String> _documentoSelecionadoController =
+      StreamController<String>.broadcast();
 
   @Input()
   String idProcesso = '';
+
+  /// Notifica a página quando o usuário escolhe um documento da árvore para
+  /// ver o conteúdo, para que ela alimente
+  /// `sei-processo-documento-conteudo` sem esta seção conhecer o consumidor.
+  @Output()
+  Stream<String> get documentoSelecionado =>
+      _documentoSelecionadoController.stream;
 
   List<ProcessoArvoreDocumentoItem> documentos =
       const <ProcessoArvoreDocumentoItem>[];
@@ -31,6 +40,9 @@ class ProcessoDocumentosComponent implements AfterChanges, OnDestroy {
   bool carregado = false;
   bool podeCarregarMais = false;
 
+  /// Documento em destaque na árvore, só para realce visual da linha.
+  String idDocumentoSelecionado = '';
+
   String _ultimoIdProcesso = '';
 
   @override
@@ -39,7 +51,14 @@ class ProcessoDocumentosComponent implements AfterChanges, OnDestroy {
       return;
     }
     _ultimoIdProcesso = idProcesso;
+    idDocumentoSelecionado = '';
     _limparEstado();
+  }
+
+  /// Marca o documento como selecionado e avisa quem estiver ouvindo.
+  void selecionarDocumento(ProcessoArvoreDocumentoItem item) {
+    idDocumentoSelecionado = item.idDocumento;
+    _documentoSelecionadoController.add(item.idDocumento);
   }
 
   /// Carrega a primeira página da árvore documental quando o usuário pedir.
@@ -99,5 +118,7 @@ class ProcessoDocumentosComponent implements AfterChanges, OnDestroy {
   }
 
   @override
-  void ngOnDestroy() {}
+  void ngOnDestroy() {
+    unawaited(_documentoSelecionadoController.close());
+  }
 }

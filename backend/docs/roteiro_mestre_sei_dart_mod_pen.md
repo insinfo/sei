@@ -2411,6 +2411,118 @@ todos verdes) e `dart run build_runner build --delete-conflicting-outputs`
 (sucedido, `web/style.css` e o `.template.dart` de `ProcessoDetalhePage`
 confirmados no `.dart_tool/build/generated`).
 
+#### Estado de execução local em 19 de agosto de 2026 — Blocos, Base de Conhecimento, conteúdo de documento e roteamento no frontend
+
+Quinta rodada do dia no `frontend`: liga os dois recursos que a rodada de
+Blocos/Base de Conhecimento deixou prontos no backend (ver "Estado de
+execução local em 19 de agosto de 2026 — Blocos e Base de Conhecimento",
+acima) e resolve o conteúdo de documento, que a rodada anterior ("conteúdo de
+documento", 18 de agosto) tinha deixado pendente por decisão de segurança de
+renderização. Também introduz `ngrouter`, que as duas rodadas anteriores
+tinham deliberadamente adiado.
+
+**Blocos e Base de Conhecimento.** `ProcessoDetalheService` ganhou
+`listarBlocos`/`listarBasesConhecimento`, no mesmo padrão `_buscarLista` dos
+métodos já existentes. Dois componentes novos,
+`ProcessoBlocosComponent` (`components/processo_blocos/`) e
+`ProcessoBasesConhecimentoComponent`
+(`components/processo_bases_conhecimento/`), seguem exatamente o padrão dos
+oito componentes de seção já existentes (`@Input() idProcesso`, `carregar`/
+`carregando`/`erro`, três estados no template). Os rótulos em português de
+`TipoBloco`/`EstadoBloco` (Assinatura/Reunião/Interno,
+Gerado/Disponibilizado/Concluído) ficam em duas extensions privadas do
+componente de blocos — não em `core`, por serem texto de apresentação, não
+contrato de dados.
+
+Achado ao implementar: `ProcessoBaseConhecimento` (projeção já existente no
+`core`) **não tem campo `conteudo`** — o Dartdoc da própria classe já
+registrava a decisão de deixá-lo fora da listagem, no mesmo padrão do
+conteúdo de documento, mas sem uma rota dedicada equivalente a
+`GET .../documentos/:idDocumento/conteudo` para buscá-lo sob demanda. Como
+essa rota de conteúdo não existe para Base de Conhecimento (confirmado em
+`processos_routes.dart`: só `/blocos`, `/bases-conhecimento` e
+`/documentos/:id/conteudo`), `ProcessoBasesConhecimentoComponent` exibe só os
+metadados retornados pela API e uma coluna fixa informando que o corpo não
+está disponível nesta listagem — sem simular HTML, endpoint ou link que o
+backend ainda não expõe. A preocupação de sanitização de HTML descrita para
+esta seção se aplica, na prática, ao conteúdo de documento (abaixo), que é
+onde o campo HTML de verdade existe.
+
+**Conteúdo de documento.** `ProcessoDocumentoConteudoComponent`
+(`components/processo_documento_conteudo/`) é o componente que faltava desde
+18 de agosto. Diferente das demais seções, não resume o processo inteiro:
+recebe `@Input() idProcesso` **e** `@Input() idDocumento`, e trata os dois
+ramos de `ProcessoDocumentoConteudo.estado`. Documento interno: o corpo HTML
+é exibido com `[innerHtml]="conteudoHtmlExibicao"`, uma `String` (nunca
+`String?`) preparada no componente — a sanitização é a automática do NgDart
+via `DomSanitizationService` padrão (o mesmo binding já usado em
+`new_sali/frontend` para `main_menu.html`), **sem** `bypassSecurityTrustHtml`
+em nenhum ponto. Documento externo: mostra nome, tamanho formatado (B/KB/MB/
+GB, calculado uma vez ao carregar, não no template) e data de inclusão do
+anexo, com aviso explícito de que o download ainda não está disponível
+porque o `SeiFileRepository` não foi implementado — nenhum link ou byte
+simulado.
+
+A seleção do documento veio de `ProcessoDocumentosComponent`: cada linha da
+árvore ganhou um botão "Ver conteúdo" que chama `selecionarDocumento(item)`,
+emitindo `@Output() Stream<String> documentoSelecionado`.
+`ProcessoDetalhePage` escuta esse evento, guarda `idDocumentoSelecionado` e o
+repassa como `@Input()` para `sei-processo-documento-conteudo`.
+
+**Roteamento com `ngrouter` — feito, não parcial.** As duas rodadas
+anteriores adiaram deliberadamente essa mudança "para não introduzir router
+pela metade"; nesta rodada ela foi concluída. Adicionada a dependência
+`ngrouter: 4.0.0-dev.3` (mesma versão de `new_sali/frontend/pubspec.yaml`).
+Novo `lib/src/shared/routes/`: `route_paths.dart` (`RoutePaths.raiz`,
+`RoutePaths.processoDetalhe` = `processos/:idProcesso`) e `app_routes.dart`
+(`AppRoutes.all`, montado a partir dos `NgFactory` gerados de `CatalogoPage`
+e `ProcessoDetalhePage`, no mesmo padrão de `new_sali/frontend/lib/src/
+shared/routes/my_routes.dart`).
+
+A mudança estrutural real: o conteúdo que antes vivia direto em
+`AppComponent` (catálogos, contexto de desenvolvimento, abas, atividades em
+aberto, processos gerados) migrou para `CatalogoPage`
+(`modules/app/pages/catalogo_page/`), roteada em `RoutePaths.raiz`.
+`AppComponent` virou casco: só `<router-outlet [routes]="routes">` e os
+provedores compartilhados pela árvore roteada (`routerProviders` mais os
+serviços que `CatalogoPage`/`ProcessoDetalhePage` precisam) — confirmado no
+próprio Dartdoc de `routerProviders` que este é o padrão esperado
+(`providers: [routerProviders]` no componente raiz, sem precisar de
+`@GenerateInjector`, o que manteve `web/main.dart` inalterado).
+
+`ProcessoDetalhePage` passou a implementar `OnActivate`: quando o `ngrouter`
+a instancia pela rota `/processos/:idProcesso`, `onActivate` lê
+`current.parameters['idProcesso']` e recarrega, no mesmo mecanismo que a
+seção "Rotas e query params transitórios" do `AGENTS.md` já descrevia para
+query params. `idProcesso` continua `@Input()` também, para uso embutido e
+teste direto do componente. `idUnidade`, que antes vinha só de `@Input()`
+porque `AppComponent` fazia o binding direto, não tem mais um pai de
+template quando a página é aberta pela rota — por isso ganhou
+`SessaoUnidadeService` (`shared/services/`), um singleton simples que guarda
+`idUnidadeSelecionada`, escrito por `CatalogoPage` quando o usuário escolhe
+unidade e lido por `ProcessoDetalhePage.onActivate`. `abrirProcesso` (antes
+um `if` que abria a página embutida) agora navega de verdade:
+`_router.navigate(RoutePaths.processoDetalhe.toUrl(parameters: {'idProcesso':
+item.idProcesso}))`; `solicitarRetorno` navega de volta para `RoutePaths.
+raiz`.
+
+Validação de que o roteamento realmente compila fim a fim, além de
+`dart analyze`: `dart run build_runner build --delete-conflicting-outputs`
+não gerou só os `.template.dart` (`app_component.template.dart`,
+`catalogo_page.template.dart`, `processo_detalhe_page.template.dart`), mas
+também `web/main.dart.js` — ou seja, o dart2js aceitou toda a árvore de
+injeção com `routerProviders` e os bindings de `[innerHtml]`/`[routes]` sem
+erro de tipo ou de geração. Não foi possível validar visualmente com
+`webdev serve` (proibido pelo `AGENTS.md`); qualquer ajuste fino de
+comportamento em tempo de navegação (por exemplo, ordem de rotas quando mais
+caminhos forem adicionados) fica como próximo passo a confirmar na primeira
+sessão manual.
+
+Validado com `dart analyze` (sem apontamentos), `dart run build_runner build
+--delete-conflicting-outputs` (sucedido, incluindo `main.dart.js`) e
+`dart test` (14 testes, todos verdes — um teste novo cobre `listarBlocos`/
+`listarBasesConhecimento` em `processo_detalhe_service_test.dart`).
+
 ### 28.5 API interna e API de compatibilidade
 
 Separar dois contratos:
@@ -3414,12 +3526,70 @@ Rotas novas:
   do processo, não ao processo em si, reproduzindo por que o SEI mostra o
   ícone "B" para todo processo daquele tipo.
 
+### Estado de execução local em 19 de agosto de 2026 — autorização SIP (não autenticação)
+
+Quinta rodada: a investigação do esquema de autenticação/autorização do SIP
+(`sip_5_0_0`), citado como pendência da E2 na seção 6.4 e em "O que a E2
+ainda exige", chegou a uma descoberta que redesenha o que é possível
+implementar aqui e agora.
+
+**Achado principal: a Base de Referência não guarda senha nem hash algum.**
+`public.usuario` não tem nenhuma coluna de credencial —
+`id_usuario, id_orgao, id_origem, sigla, nome, sin_ativo, cpf,
+nome_registro_civil, nome_social, email, sin_bloqueado, dth_pausa_2fa` é o
+esquema inteiro. `servidor_autenticacao` tem só **2 linhas reais**, ambas
+`sta_tipo = 'AD'` (Active Directory), porta `389`, endereço
+`hostnamedoservidor.dominio.gov.br` — um placeholder de instalador, não um
+servidor real —, e `rel_orgao_autenticacao` liga cada órgão a um desses dois
+servidores. Ou seja: o SEI real terceiriza toda verificação de identidade a
+um LDAP/AD externo por órgão, e esse LDAP/AD **não existe neste laboratório
+local**. Não é possível, nem seria fiel ao produto real, implementar "login
+com senha e hash" contra este esquema — seria inventar um mecanismo que a
+própria Base de Referência não usa. Essa descoberta está registrada com o
+esquema completo em `backend/docs/evidencias_processo_detalhe.md`.
+
+**A barreira de autenticação real da E2 continua de pé.** Login, sessão,
+troca de unidade ativa e o adaptador LDAP/AD (ou SSO gov.br) descrito na
+seção 6.4 seguem sem solução — essa é uma decisão de arquitetura que não foi
+tomada nesta rodada, e nenhuma tentativa de senha, hash ou sessão foi feita
+aqui. O que mudou é que a frase "Autenticação e autorização por recurso do
+SIP", citada como um único bloco pendente, na verdade descrevia dois
+requisitos independentes — e só um deles depende do LDAP inexistente.
+
+**O que foi resolvido é a outra metade: autorização por recurso.** Dado um
+`id_usuario` e um `id_unidade` já conhecidos por outro mecanismo (hoje, o
+contexto de desenvolvimento não autenticado do projeto — não alterado nesta
+rodada), `SipReferenciaRepository.resolverAutorizacao` junta `permissao` →
+`perfil` → `rel_perfil_recurso` → `recurso` em duas consultas únicas (sem
+N+1) e resolve quais perfis estão vigentes na janela `dta_inicio`/`dta_fim`
+e quais recursos (telas/ações) esses perfis liberam, deduplicados. Exposto
+em `GET /api/v1/sip/usuarios/:idUsuario/autorizacao?idUnidade=&idSistema=`.
+
+Contra o único usuário com permissão real na Base de Referência
+(`id_usuario = 100000001`, unidade raiz `110000000`): 8 perfis vigentes e
+1.544 recursos distintos liberados, combinando os sistemas SIP e SEI —
+1.314 deles só do SEI, ao filtrar por `id_sistema`. `tipo_permissao` virou
+enum (`TipoPermissao`) com confiança total, diferente dos demais códigos de
+domínio deste roteiro: é catálogo de 3 linhas cuja própria coluna
+`descricao` documenta o significado, não um código de uma letra a inferir.
+
+Cinco DTOs novos no `core` (`PerfilSip`, `RecursoSip`, `PerfilAtivo`,
+`AutorizacaoUsuario`, `TipoPermissao`), todos somente leitura — nenhum
+representa entidade gravável, então nenhum sobrescreve `toInsertMap()`/
+`toUpdateMap()`. Regressão em
+`backend/test/integration/sip_referencia_repository_test.dart` (contra as 8
+linhas reais de `permissao`, sem fixture sintética) e em
+`backend/test/integration/cors_e_injecao_dependencias_test.dart` (rota HTTP
+ponta a ponta).
+
 #### O que a E2 ainda exige
 
-Autenticação e autorização por recurso do SIP, paginação e filtros completos do
-Controle de Processos, e baseline visual diferencial. A fixture transacional
-cobre a verificação de consulta, mas **não** substitui uma instalação
-autorizada com processo real para a comparação de tela.
+Autenticação do SIP — login, sessão e adaptador LDAP/AD real ou SSO gov.br,
+ainda sem solução —, paginação e filtros completos do Controle de Processos,
+e baseline visual diferencial. A autorização por recurso do SIP, citada
+anteriormente junto com autenticação, já está resolvida (ver acima). A
+fixture transacional cobre a verificação de consulta, mas **não** substitui
+uma instalação autorizada com processo real para a comparação de tela.
 
 ### Entrega E2 — Primeira linha na tela
 
