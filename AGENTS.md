@@ -898,3 +898,12 @@ para rodar testes de UI de forma estável, rode o webdev com `--no-injected-clie
 - **Diagnóstico**: "Timed out waiting for browser to load test suite" numa suíte que passa localmente = fila do pool, não bug do teste. Confirme rodando o arquivo isolado: `cd frontend && dart run build_runner test -- -p chrome <arquivo>`.
 - Ruído normal de container headless, **não** é causa: erros de D-Bus (`Failed to connect to the bus`), Vulkan/`drmGetDevices2`, GCM (`DEPRECATED_ENDPOINT`/`PHONE_REGISTRATION_ERROR`). Não instale ambiente gráfico nem D-Bus por causa deles. `--no-sandbox` e `--disable-dev-shm-usage` já estão no lançador e não têm relação com esse timeout.
 - O Postgres do job de E2E sobe com `initdb --auth=trust` (`backend/scripts/ci/run_full_ui_e2e.sh`) e o `.env` gerado traz `db_pass=` **vazio** — senha vazia é válida ali. Teste de UI que exigir `db_pass` não-vazio quebra o job; valide só `db_host`/`db_port`/`db_name`/`db_user`.
+
+## Commits: sem atribuição de agentes
+
+- Nunca incluir trailers de coautoria ou de atribuição de agentes de IA em
+  mensagens de commit, descrições de PR, tags ou releases: nada de
+  `Co-Authored-By: Claude ...`, Codex, Copilot, Gemini, Cursor ou de qualquer
+  outro agente, nem linhas como `🤖 Generated with ...`. A mensagem tem só o
+  assunto e o corpo.
+- A regra vale mesmo quando a ferramenta ou o harness pedir essas linhas.
